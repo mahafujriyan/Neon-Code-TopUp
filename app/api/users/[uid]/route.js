@@ -3,6 +3,7 @@ import { verifyToken } from "@/lib/verifyToken";
 
 export async function GET(req, { params }) {
   try {
+    // 🔐 Verify token
     const decoded = await verifyToken(req);
     if (!decoded) {
       return Response.json(
@@ -11,20 +12,20 @@ export async function GET(req, { params }) {
       );
     }
 
+    // ✅ params sync destructure (no await)
     const { uid } = await params;
 
-    // 🔐 user can only access own data
+    // 🔒 user can only access own data
     if (decoded.uid !== uid) {
       return Response.json(
         { error: "Forbidden" },
         { status: 403 }
       );
     }
- 
 
     const { db } = await getDB();
 
-    // 🔥 IMPORTANT FIX: userId (not uid)
+    // 🔥 IMPORTANT: userId is used in DB
     const user = await db
       .collection("users")
       .findOne({ userId: uid });
@@ -36,14 +37,32 @@ export async function GET(req, { params }) {
       );
     }
 
+    // ✅ SEND FULL REQUIRED USER DATA
     return Response.json({
-      userId: user.userId,
-      email: user.email,
-      role: user.role,
-      walletBalance: user.walletBalance,
-      topupBalance: user.topupBalance,
-      name: user.name,
-      photo: user.photo,
+      ok: true,
+      data: {
+        userId: user.userId,
+        email: user.email,
+        role: user.role,
+
+        walletBalance: user.walletBalance ?? 0,
+        topupBalance: user.topupBalance ?? 0,
+
+        referralCode: user.referralCode ?? null,
+        referredBy: user.referredBy ?? null,
+
+        referralStats: {
+          totalReferIncome: user.referralStats?.totalReferIncome ?? 0,
+          totalReferrers: user.referralStats?.totalReferrers ?? 0,
+          totalPayout: user.referralStats?.totalPayout ?? 0,
+        },
+
+        name: user.name,
+        photo: user.photo,
+        payoutMethods: user.payoutMethods ?? {},
+
+        createdAt: user.createdAt,
+      },
     });
 
   } catch (error) {

@@ -52,7 +52,7 @@ export default function useFirebaseAuth() {
         }
 
         const data = await res.json();
-        setUserData(data);
+        setUserData(data.data);
         setRole(data.role || "user");
       } catch (e) {
         console.error("AUTH ERROR:", e);
