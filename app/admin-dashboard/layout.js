@@ -14,7 +14,7 @@ export default function AdminLayout({ children }) {
       <div className="flex-1 h-full overflow-y-auto bg-gray-50 text-black">
         {children}
       </div>
-
+    
     </div>
   );
 }

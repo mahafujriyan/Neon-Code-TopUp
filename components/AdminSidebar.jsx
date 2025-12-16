@@ -64,6 +64,12 @@ const AdminSidebar = () => {
       public: true,
     },
     {
+      name: "Live Chats",
+      icon: LifeBuoy,
+      href: "/admin-dashboard/chats",
+      public: true,
+    },
+    {
       name: "Affiliate Payouts",
       icon: Share2,
       href: "/admin-dashboard/affiliates",

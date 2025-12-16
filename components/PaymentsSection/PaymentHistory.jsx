@@ -218,6 +218,8 @@ const PaymentHistory = () => {
                           ? "bg-yellow-100 text-yellow-700"
                           : p?.status?.toLowerCase() === "rejected"
                           ? "bg-red-100 text-red-600"
+                          : p?.status?.toLowerCase() === "cancelled"
+                          ? "bg-red-100 text-red-600"
                           : "bg-gray-200 text-gray-700"
                       }`}
                     >
