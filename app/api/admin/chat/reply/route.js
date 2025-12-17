@@ -1,31 +1,39 @@
-
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/verifyToken";
 import { adminDB } from "@/lib/firebaseAdmin";
-import admin from "firebase-admin";
+import getDB from "@/lib/mongodb";
+
+// 🔥 IMPORTANT FIX
+import {
+  FieldValue,
+  Timestamp,
+} from "firebase-admin/firestore";
 
 export async function POST(req) {
   try {
     const decoded = await verifyToken(req);
-
     if (!decoded) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (decoded.role !== "admin" && decoded.role !== "manager") {
+    const { db } = await getDB();
+    const adminUser = await db
+      .collection("users")
+      .findOne({ userId: decoded.uid });
+
+    if (!adminUser || adminUser.role !== "admin" ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { chatId, text } = await req.json();
-
-    if (!chatId || !text) {
+    if (!chatId || !text?.trim()) {
       return NextResponse.json(
         { error: "chatId and text required" },
         { status: 400 }
       );
     }
 
-    // 🔹 Save admin message
+    // ✅ Save admin message
     await adminDB
       .collection("chats")
       .doc(chatId)
@@ -34,24 +42,21 @@ export async function POST(req) {
         senderRole: "admin",
         type: "text",
         text,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
         seen: false,
       });
 
-    // 🔹 Update chat meta
+    // ✅ Update chat meta
     await adminDB.collection("chats").doc(chatId).update({
       lastMessage: text,
-      unreadForUser: admin.firestore.FieldValue.increment(1),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      lastSender: "admin",
+      unreadForUser: FieldValue.increment(1),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     return NextResponse.json({ ok: true });
-
   } catch (err) {
     console.error("ADMIN REPLY ERROR:", err);
-    return NextResponse.json(
-      { error: "Server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

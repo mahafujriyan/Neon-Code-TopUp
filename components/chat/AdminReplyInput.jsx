@@ -1,11 +1,13 @@
 
 "use client";
-
+import useFirebaseAuth from "@/hooks/useFirebaseAuth";
 import { useState } from "react";
 
 export default function AdminReplyInput({ chatId }) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { token } = useFirebaseAuth();
 
   const sendReply = async () => {
     if (!text.trim()) return;
@@ -15,7 +17,9 @@ export default function AdminReplyInput({ chatId }) {
 
       const res = await fetch("/api/admin/chat/reply", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+         },
         body: JSON.stringify({ chatId, text }),
       });
 

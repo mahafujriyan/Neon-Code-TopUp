@@ -1,18 +1,30 @@
 "use client";
 
-import { useEffect } from "react";
+import { use, useEffect } from "react";
 import ChatMessages from "./ChatMessages";
 import AdminReplyInput from "./AdminReplyInput";
+import useFirebaseAuth from "@/hooks/useFirebaseAuth";
 
 export default function AdminChatWindow({ chatId }) {
 
+  const { token } = useFirebaseAuth();
+
+
   // 🔔 admin opens chat → unread reset
+
+  console.log("admin chat window" ,chatId)
+
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !token) return;
+
+    
 
     fetch("/api/admin/chat/read", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+
+       },
       body: JSON.stringify({ chatId }),
     });
   }, [chatId]);

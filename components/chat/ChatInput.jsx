@@ -1,7 +1,13 @@
-
 "use client";
+
 import { useState } from "react";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "@/lib/firebaseClient";
 import ImageUploader from "../ImageUploader";
 
@@ -12,9 +18,16 @@ export default function ChatInput({ chatId, user }) {
   const send = async () => {
     if (!text && !image) return;
 
+    // 🔥 Update root chat document (Inbox optimization)
     await setDoc(
       doc(db, "chats", chatId),
-      { userId: user.uid, status: "open", updatedAt: new Date() },
+      {
+        userId: user.uid,
+        status: "open",
+        lastMessage: text || "📷 Image",
+        lastSender: "user",
+        updatedAt: serverTimestamp(),
+      },
       { merge: true }
     );
 
@@ -23,7 +36,7 @@ export default function ChatInput({ chatId, user }) {
         senderRole: "user",
         type: "text",
         text,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       });
     }
 
@@ -32,7 +45,7 @@ export default function ChatInput({ chatId, user }) {
         senderRole: "user",
         type: "image",
         imageUrl: image.url,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       });
     }
 
@@ -43,6 +56,7 @@ export default function ChatInput({ chatId, user }) {
   return (
     <div className="border-t p-2 space-y-2">
       <ImageUploader onUploadSuccess={setImage} />
+
       <div className="flex gap-2">
         <input
           value={text}
@@ -50,7 +64,10 @@ export default function ChatInput({ chatId, user }) {
           className="flex-1 border rounded px-2"
           placeholder="Type message"
         />
-        <button onClick={send} className="bg-blue-600 text-white px-3 rounded">
+        <button
+          onClick={send}
+          className="bg-blue-600 text-white px-4 rounded"
+        >
           Send
         </button>
       </div>
