@@ -24,7 +24,7 @@ export async function GET(req) {
 
     // Format response data
     const formatted = payments.map(p => ({
-      id: p.trxId,
+      id: p.trx_id,
       date: p.createdAt.toISOString(),
       description: p.method === "bank_transfer" ? "Manual Payment" : "Online Payment",
       amount: p.amount,

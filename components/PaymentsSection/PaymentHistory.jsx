@@ -2,13 +2,12 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import {
-  FileText,
   RefreshCw,
   ChevronLeft,
   ChevronRight,
   Filter,
   Download,
-  ChevronDown, // <--- Correctly imported now
+  ChevronDown, 
 } from "lucide-react";
 import useFirebaseAuth from "@/hooks/useFirebaseAuth";
 

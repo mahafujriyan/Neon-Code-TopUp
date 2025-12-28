@@ -52,9 +52,6 @@ export async function POST(req) {
 
     /* ---------- DB ---------- */
     const { db } = await getDB();
-
-
-
     const user = await db
       .collection("users")
       .findOne({ userId: decoded.uid });
@@ -65,8 +62,7 @@ export async function POST(req) {
 
     /* ---------- BALANCE CHECK ---------- */
     const withdrawable =
-      (user.referralStats?.totalReferIncome || 0) -
-      (user.referralStats?.totalPayout || 0);
+      (user.referralStats?.totalReferIncome || 0)
 
     if (amount > withdrawable) {
       return NextResponse.json(
@@ -98,7 +94,7 @@ export async function POST(req) {
 
     /* ---------- CREATE WITHDRAW REQUEST ---------- */
     await db.collection("referral_withdraw_requests").insertOne({
-      userId: decoded.uid,
+      userUid: decoded.uid,
       userName: user.name,
       userEmail: user.email,
       amount,
@@ -108,6 +104,18 @@ export async function POST(req) {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+
+    await db.collection("otherCollection").insertOne({
+      userUid: decoded.uid,
+      type: "WITHDRAW_REQUEST",
+      title: "Referral Withdraw Request",
+      description: `Amount: ${amount} | Method: ${method}`,
+      status: "pending",
+      amount,
+      createdAt: new Date(),
+    });
+
+
 
     return NextResponse.json({
       ok: true,

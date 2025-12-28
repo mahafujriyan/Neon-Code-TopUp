@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import getDB from "@/lib/mongodb";
-import { verifyToken } from "@/lib/firebaseClient"; 
+import { verifyToken } from "@/lib/verifyToken";
+
 
 export async function POST(req) {
   try {
@@ -16,11 +17,9 @@ export async function POST(req) {
         { status: 400 }
       );
 
-    // ---- Unit Conversion (MOST IMPORTANT FIX) ----
-    // Convert limit to sub-units (cents/paisa) by multiplying by 100
     const spendCapInSubUnits = Math.round(new_limit * 100);
 
-    const db = await getDB(); // Assuming this connects to MongoDB // ---- FB Spending Limit Update ----
+    const db = await getDB();
 
     const response = await fetch(
       // URL Format: v18.0/act_1234567890
@@ -29,7 +28,7 @@ export async function POST(req) {
         method: "POST", // Header will be automatically set to application/x-www-form-urlencoded
         body: new URLSearchParams({
           access_token: process.env.FB_SYS_TOKEN,
-          spend_cap: spendCapInSubUnits, 
+          spend_cap: spendCapInSubUnits,
         }),
       }
     );
@@ -48,12 +47,21 @@ export async function POST(req) {
     } // ---- Save Log ----
 
     await db.collection("ads_spending_limit_logs").insertOne({
-      user_id: user.uid,
+      userUid: user.uid,
       ad_account_id,
       old_limit,
       new_limit,
       approved: true,
       timestamp: new Date(),
+    });
+
+    await db.collection("otherCollection").insertOne({
+      userId: user.uid,
+      type: "LIMIT_CHANGE",
+      title: "Ad Spending Limit Updated",
+      description: `Account ID: ${ad_account_id} | Old: ${old_limit} -> New: ${new_limit}`,
+      status: "success",
+      createdAt: new Date(),
     });
 
     return NextResponse.json({

@@ -42,7 +42,7 @@ const UserSidebar = () => {
     {
       name: "History",
       icon: History,
-      href: "/user-dashboard/payment-history",
+      href: "/user-dashboard/history",
     },
     {
       name: "Support Tickets",

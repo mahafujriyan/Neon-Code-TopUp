@@ -27,7 +27,7 @@ export async function PUT(req) {
     if (status) updateData.status = status;
     if (MetaAccountID !== undefined) updateData.MetaAccountID = MetaAccountID;
 
-    // ফাইন্ড এবং আপডেট
+
     const result = await db
       .collection("adAccountRequests")
       .findOneAndUpdate(
@@ -38,18 +38,30 @@ export async function PUT(req) {
 
     const updatedDoc = result.value || result;
 
-    if (!updatedDoc || (result.ok === 0)) {
+    if (!updatedDoc) {
       return NextResponse.json(
         { message: "Request not found in database" },
         { status: 404 }
       );
     }
 
+    const historyData = {
+      requestId: updatedDoc._id,
+      userUid: updatedDoc.userUid,
+      type: "Get Meta Account ID",
+      title: MetaAccountID ,
+      status: updatedDoc.status, 
+      updatedAt: new Date(),
+    };
+
+    await db.collection("otherCollection").insertOne(historyData);
+
     return NextResponse.json({
       ok: true,
-      message: "Request updated successfully",
+      message: "Request updated and history recorded",
       data: updatedDoc,
     });
+
   } catch (err) {
     console.error("Update Error:", err);
     return NextResponse.json(

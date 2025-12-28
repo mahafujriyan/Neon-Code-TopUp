@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import getDB from "@/lib/mongodb";
 import { verifyToken } from "@/lib/verifyToken";
 import crypto from "crypto"; // র‍্যান্ডম আইডি তৈরির জন্য
+import { db } from "@/lib/firebaseClient";
 
 export async function POST(req) {
   try {
@@ -9,11 +10,16 @@ export async function POST(req) {
     if (!decoded) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const { amount, reason } = await req.json();
-
-    // ১. একটি ইউনিক ট্র্যাকিং আইডি তৈরি করুন (এটিই আপনার trx_id হবে)
+      
+    if (!amount || !reason) {
+      return NextResponse.json(
+        { ok: false, error: "Amount and reason are required" },
+        { status: 400 }
+      );
+    }
     const trackingId = crypto.randomBytes(12).toString("hex");
 
-    // ২. পেলোড তৈরি করুন এবং cancel_url এর সাথে trackingId যোগ করুন
+ 
     const payload = {
       full_name: decoded.email,
       email: decoded.email,
@@ -38,10 +44,9 @@ export async function POST(req) {
 
     if (data.status && data.payment_url) {
       const { db } = await getDB();
-      
-      // ৩. ডাটাবেজে আমাদের তৈরি করা trackingId দিয়ে সেভ করুন
+   
       await db.collection("payments").insertOne({
-        trx_id: trackingId, // গেটওয়ের আইডির বদলে আমাদের জেনারেট করা আইডি
+        trx_id: trackingId, 
         userUid: decoded.uid,
         email: decoded.email,
         method: "uddoktapay",
@@ -57,6 +62,8 @@ export async function POST(req) {
         trx_id: trackingId,
       });
     }
+
+
 
     return NextResponse.json({ ok: false, data }, { status: 400 });
 

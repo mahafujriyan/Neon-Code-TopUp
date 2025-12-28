@@ -17,6 +17,7 @@ const ROWS_PER_PAGE = 10;
 const STATUS_OPTIONS = ["All", "approved", "Pending", "Failed"]; 
 
 const PaymentHistoryUI = () => {
+  
   const { token } = useFirebaseAuth();
 
   const [payments, setPayments] = useState([]); // Original fetched data
