@@ -12,6 +12,22 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+const StatCard = ({ title, value, icon: Icon, color, suffix = "$" }) => (
+  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+    <div className="flex justify-between items-start mb-4">
+      <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
+        <Icon size={24} />
+      </div>
+      <div className="text-right">
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{title}</p>
+        <h3 className="text-2xl font-black text-gray-900 mt-1">
+          {value?.toLocaleString()} <span className="text-sm font-medium">{suffix}</span>
+        </h3>
+      </div>
+    </div>
+  </div>
+);
+
 const OverviewPage = () => {
   const { userData } = useFirebaseAuth();
 
@@ -36,22 +52,6 @@ const OverviewPage = () => {
   const marginPercentage = totalFlow > 0 
     ? ((stats.totalReferIncome / totalFlow) * 100).toFixed(1) 
     : 0;
-
-  const StatCard = ({ title, value, icon: Icon, color, suffix = "$" }) => (
-    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
-          <Icon size={24} />
-        </div>
-        <div className="text-right">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{title}</p>
-          <h3 className="text-2xl font-black text-gray-900 mt-1">
-            {value?.toLocaleString()} <span className="text-sm font-medium">{suffix}</span>
-          </h3>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="w-full bg-white min-h-screen pt-20 p-4 md:p-8">
@@ -172,7 +172,7 @@ const OverviewPage = () => {
                 ></div>
               </div>
               <p className="text-sm text-gray-400 mt-8 leading-relaxed">
-                You've successfully invited <span className="text-white font-bold">{stats.totalReferrers} users</span> with a total earning of <span className="text-white font-bold">৳{stats.totalReferIncome}</span>.
+                You&apos;ve successfully invited <span className="text-white font-bold">{stats.totalReferrers} users</span> with a total earning of <span className="text-white font-bold">৳{stats.totalReferIncome}</span>.
               </p>
             </div>
             {/* Decoration */}

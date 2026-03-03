@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Banknote,
   ArrowUpRight,
@@ -23,7 +23,7 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState("");
 
   // ------------ Fetch Payments --------------
-  const loadPayments = async () => {
+  const loadPayments = useCallback(async () => {
     if (!token) return; // wait until auth ready
 
     setLoading(true);
@@ -45,11 +45,15 @@ export default function TransactionsPage() {
       console.log("Fetch error:", e);
     }
     setLoading(false);
-  };
+  }, [token]);
 
   useEffect(() => {
-    loadPayments();
-  }, [token]); // wait for token
+    if (!token) return;
+    const timer = setTimeout(() => {
+      void loadPayments();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [token, loadPayments]); // wait for token
 
   // ------------ Approve / Reject Handler --------------
   const handleAction = async (userUid, action) => {

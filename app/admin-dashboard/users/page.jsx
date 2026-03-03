@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Search, Shield, Trash2, Download, UserCheck, UserX, Clock } from "lucide-react";
+import { Search, Shield, Trash2, Download, UserCheck, UserX, Clock, Users } from "lucide-react";
 import useFirebaseAuth from "@/hooks/useFirebaseAuth";
 import ManageUserModal from "@/components/ManageUserModal";
 

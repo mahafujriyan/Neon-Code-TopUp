@@ -49,14 +49,7 @@ const InputField = ({ label, name, type = "text", icon: Icon, required = true, p
 );
 
 export default function ReqAdAcModal({ isOpen, onClose }) {
-  if (!isOpen) return null;
-
-  const { user } = useFirebaseAuth();
-
-  const getAuthToken = async () => {
-    if (user && user.getIdToken) return await user.getIdToken();
-    return null;
-  };
+  const { user, token } = useFirebaseAuth();
 
   const [formData, setFormData] = useState({
     accountName: "",
@@ -71,6 +64,8 @@ export default function ReqAdAcModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ type: "", message: "" });
 
+  if (!isOpen) return null;
+
   const handleChange = (e) => {
     setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
   };
@@ -79,8 +74,6 @@ export default function ReqAdAcModal({ isOpen, onClose }) {
     e.preventDefault();
     setStatusMessage({ type: "", message: "" });
     setLoading(true);
-
-    const token = await getAuthToken();
 
     if (!token) {
       setStatusMessage({

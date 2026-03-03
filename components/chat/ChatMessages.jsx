@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import { db, auth } from "@/lib/firebaseClient";
+import useFirebaseAuth from "@/hooks/useFirebaseAuth";
 
 export default function ChatMessages({ chatId, currentRole = "user" }) {
   const [messages, setMessages] = useState([]);
+  const { token } = useFirebaseAuth();
   const scrollRef = useRef(null);
 
   // Auto-scroll to bottom
@@ -19,24 +19,31 @@ export default function ChatMessages({ chatId, currentRole = "user" }) {
   }, [messages]);
 
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !token) return;
 
-    const q = query(
-      collection(db, "chats", chatId, "messages"),
-      orderBy("createdAt", "asc")
-    );
+    let active = true;
+    const fetchMessages = async () => {
+      try {
+        const res = await fetch(`/api/chat/messages?chatId=${encodeURIComponent(chatId)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        const data = await res.json();
+        if (active && data?.ok) {
+          setMessages(data.messages || []);
+        }
+      } catch (err) {
+        console.error("CHAT FETCH ERROR:", err);
+      }
+    };
 
-    const unsub = onSnapshot(q, (snap) => {
-      setMessages(
-        snap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-      );
-    });
-
-    return unsub;
-  }, [chatId]);
+    void fetchMessages();
+    const interval = setInterval(fetchMessages, 3000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [chatId, token]);
 
   return (
     <div 
@@ -88,8 +95,8 @@ export default function ChatMessages({ chatId, currentRole = "user" }) {
 
               {/* Timestamp */}
               <div className={`text-[10px] mt-1.5 flex ${isMe ? 'justify-end text-blue-100' : 'justify-start text-zinc-400'}`}>
-                {m.createdAt?.seconds ? (
-                  new Date(m.createdAt.seconds * 1000).toLocaleTimeString([], {
+                {m.createdAt ? (
+                  new Date(m.createdAt).toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
                   })

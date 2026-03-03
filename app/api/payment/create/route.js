@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import getDB from "@/lib/mongodb";
 import { verifyToken } from "@/lib/verifyToken";
 import crypto from "crypto"; // র‍্যান্ডম আইডি তৈরির জন্য
-import { db } from "@/lib/firebaseClient";
 
 export async function POST(req) {
   try {

@@ -35,7 +35,7 @@ export default function ChatWindow({ user, onClose }) {
 
       {/* --- Input Area: Fixed at Bottom --- */}
       <div className="flex-none p-3 bg-[#214311]">
-        <ChatInput chatId={chatId} user={user} />
+        <ChatInput chatId={chatId} />
       </div>
     </div>
   );

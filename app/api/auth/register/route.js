@@ -1,139 +1,86 @@
-import getDB from "@/lib/mongodb";
+﻿import getDB from "@/lib/mongodb";
 import crypto from "crypto";
-import { adminAuth } from "@/lib/firebaseAdmin";
+import { hashPassword } from "@/lib/password";
 
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { uid, email, name, photo, referralCode } = body;
+    const { email, password, name, photo, referralCode } = body;
 
-    if (!uid) {
-      return Response.json(
-        { ok: false, error: "UID required" },
-        { status: 400 }
-      );
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const normalizedName = String(name || "").trim();
+
+    if (!normalizedEmail || !password) {
+      return Response.json({ ok: false, error: "Email and password are required" }, { status: 400 });
+    }
+
+    if (password.length < 6) {
+      return Response.json({ ok: false, error: "Password must be at least 6 characters" }, { status: 400 });
     }
 
     const { db } = await getDB();
+    const existingUser = await db.collection("users").findOne({ email: normalizedEmail });
 
-    /* ================= CHECK EXISTING USER ================= */
-    const existingUser = await db.collection("users").findOne({ userId: uid });
-
-    // 👉 If user already exists, just update basic info
     if (existingUser) {
-      await db.collection("users").updateOne(
-        { userId: uid },
-        {
-          $set: {
-            email: email || existingUser.email,
-            name: name || existingUser.name,
-            photo:
-              photo ||
-              existingUser.photo ||
-              "https://i.ibb.co/kgp65LMf/profile-avater.png",
-            updatedAt: new Date(),
-          },
-        }
-      );
-
-      // 🔐 Ensure Firebase custom claim exists
-      await adminAuth.setCustomUserClaims(uid, {
-        role: existingUser.role || "user",
-      });
-
-      return Response.json({ ok: true, existing: true });
+      return Response.json({ ok: false, error: "Account already exists with this email" }, { status: 409 });
     }
 
-    /* ================= REFERRAL VALIDATION (NEW USER ONLY) ================= */
     let referredByUser = null;
-
     if (referralCode) {
-      referredByUser = await db.collection("users").findOne({
-        referralCode: referralCode.trim().toUpperCase(),
-      });
-
+      referredByUser = await db.collection("users").findOne({ referralCode: String(referralCode).trim().toUpperCase() });
       if (!referredByUser) {
-        return Response.json(
-          { ok: false, error: "Invalid referral code" },
-          { status: 400 }
-        );
-      }
-
-      if (referredByUser.userId === uid) {
-        return Response.json(
-          { ok: false, error: "You cannot use your own referral code" },
-          { status: 400 }
-        );
+        return Response.json({ ok: false, error: "Invalid referral code" }, { status: 400 });
       }
     }
 
-    /* ================= GENERATE UNIQUE REFERRAL CODE ================= */
     let myReferralCode;
-    let exists = true;
-
-    while (exists) {
+    let codeExists = true;
+    while (codeExists) {
       myReferralCode = crypto.randomBytes(4).toString("hex").toUpperCase();
-
-      exists = await db
-        .collection("users")
-        .findOne({ referralCode: myReferralCode });
+      codeExists = await db.collection("users").findOne({ referralCode: myReferralCode });
     }
 
-    /* ================= CREATE NEW USER ================= */
-    await db.collection("users").insertOne({
-      userId: uid,
-      role: "user",
+    const userId = crypto.randomUUID();
+    const { hash, salt } = hashPassword(password);
 
+    await db.collection("users").insertOne({
+      userId,
+      role: "user",
       permissions: {
         projectsAccess: false,
         transactionsAccess: false,
         affiliateAccess: false,
         metaAdAccess: false,
       },
-
       walletBalance: 0,
       topupBalance: 0,
-
       referralCode: myReferralCode,
       referredBy: referredByUser ? referredByUser.userId : null,
-
       referralStats: {
         totalReferIncome: 0,
         totalReferrers: 0,
         totalPayout: 0,
       },
-
-      email: email || "",
-      name: name || "User",
+      email: normalizedEmail,
+      name: normalizedName || "User",
       photo: photo || "https://i.ibb.co/kgp65LMf/profile-avater.png",
-
+      passwordHash: hash,
+      passwordSalt: salt,
+      authProvider: "credentials",
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    /* ================= SET FIREBASE CUSTOM CLAIM ================= */
-    await adminAuth.setCustomUserClaims(uid, {
-      role: "user",
-    });
-
-    /* ================= INCREASE REFERRER COUNT ================= */
     if (referredByUser) {
       await db.collection("users").updateOne(
         { userId: referredByUser.userId },
-        {
-          $inc: {
-            "referralStats.totalReferrers": 1,
-          },
-        }
+        { $inc: { "referralStats.totalReferrers": 1 } }
       );
     }
 
-    return Response.json({ ok: true, created: true });
+    return Response.json({ ok: true, created: true, userId });
   } catch (e) {
     console.error("Register error:", e);
-    return Response.json(
-      { ok: false, error: "Server error" },
-      { status: 500 }
-    );
+    return Response.json({ ok: false, error: "Server error" }, { status: 500 });
   }
 }

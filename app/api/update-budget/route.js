@@ -1,31 +1,29 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import getDB from "@/lib/mongodb";
 import { verifyToken } from "@/lib/verifyToken";
 
-
 export async function POST(req) {
   try {
-    // ---- Verify Auth ----
-    const user = verifyToken(req);
-    if (!user)
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); // ---- Inputs ----
+    const user = await verifyToken(req);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { ad_account_id, new_limit, old_limit } = await req.json();
-    if (!ad_account_id || new_limit === undefined)
+    if (!ad_account_id || new_limit === undefined) {
       return NextResponse.json(
         { error: "Invalid Input: ad_account_id and new_limit are required." },
         { status: 400 }
       );
+    }
 
     const spendCapInSubUnits = Math.round(new_limit * 100);
-
-    const db = await getDB();
+    const { db } = await getDB();
 
     const response = await fetch(
-      // URL Format: v18.0/act_1234567890
       `https://graph.facebook.com/v18.0/act_${ad_account_id}`,
       {
-        method: "POST", // Header will be automatically set to application/x-www-form-urlencoded
+        method: "POST",
         body: new URLSearchParams({
           access_token: process.env.FB_SYS_TOKEN,
           spend_cap: spendCapInSubUnits,
@@ -36,15 +34,12 @@ export async function POST(req) {
     const fbResult = await response.json();
 
     if (fbResult.error) {
-      // Log the error message from Facebook for debugging
       console.error("Facebook API Error:", fbResult.error);
       return NextResponse.json(
-        {
-          error: fbResult.error.message || "Facebook API Error",
-        },
+        { error: fbResult.error.message || "Facebook API Error" },
         { status: 400 }
       );
-    } // ---- Save Log ----
+    }
 
     await db.collection("ads_spending_limit_logs").insertOne({
       userUid: user.uid,
@@ -67,7 +62,7 @@ export async function POST(req) {
     return NextResponse.json({
       success: true,
       message: "Spending Limit Updated Successfully",
-      new_spend_cap: new_limit, // Return the user-friendly limit
+      new_spend_cap: new_limit,
     });
   } catch (err) {
     console.error("Server Catch Error:", err);

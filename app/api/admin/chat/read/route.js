@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/verifyToken";
-import { adminDB } from "@/lib/firebaseAdmin";
-import getDB from "@/lib/mongodb"; // getDB ইম্পোর্ট নিশ্চিত করুন
+import getDB from "@/lib/mongodb";
 
 export async function POST(req) {
   try {
@@ -21,10 +20,10 @@ export async function POST(req) {
 
     const { chatId, userId } = await req.json();
 
-    // ১. আনরিড কাউন্ট ০ করা
-    await adminDB.collection("chats").doc(chatId).update({
-      unreadForAdmin: 0,
-    });
+    await db.collection("live_chats").updateOne(
+      { chatId },
+      { $set: { unreadForAdmin: 0, updatedAt: new Date() } }
+    );
 
     // ২. MongoDB থেকে ইউজারের তথ্য নিয়ে আসা
     const userData = await db

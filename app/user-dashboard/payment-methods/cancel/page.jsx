@@ -26,7 +26,7 @@ export default function PaymentCancelPage() {
           </h1>
           
           <p className="text-slate-500 mb-8 leading-relaxed">
-            Your transaction was not completed. Don't worry, no funds have been deducted from your account.
+            Your transaction was not completed. Don&apos;t worry, no funds have been deducted from your account.
           </p>
 
           {/* Info Notice Box */}

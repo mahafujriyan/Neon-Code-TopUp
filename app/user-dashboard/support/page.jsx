@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useFirebaseAuth from "@/hooks/useFirebaseAuth";
 import UserChatView from "./[ticketId]/page";
 import CreateTicketPage from "./create/page";
@@ -11,7 +11,7 @@ export default function MyTicketsPage() {
   const [view, setView] = useState("list"); // list, create, chat
   const [activeTicketId, setActiveTicketId] = useState(null);
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     if (!token) return;
     try {
       const res = await fetch("/api/support/ticket/my", {
@@ -22,11 +22,15 @@ export default function MyTicketsPage() {
     } catch (err) {
       console.error("Error fetching tickets:", err);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
-    fetchTickets();
-  }, [token]);
+    if (!token) return;
+    const timer = setTimeout(() => {
+      void fetchTickets();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [token, fetchTickets]);
 
   const handleBackToList = () => {
     setView("list");
@@ -72,7 +76,7 @@ export default function MyTicketsPage() {
                 <MessageSquare size={40} className="text-gray-200" />
               </div>
               <h3 className="text-gray-800 font-bold text-sm">No tickets found</h3>
-              <p className="text-xs text-gray-400 mt-1">We couldn't find any support requests.</p>
+              <p className="text-xs text-gray-400 mt-1">We couldn&apos;t find any support requests.</p>
             </div>
           ) : (
             tickets.map((t) => {

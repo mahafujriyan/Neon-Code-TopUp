@@ -1,118 +1,138 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
-import { auth } from "@/lib/firebaseClient";
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut,
-  GoogleAuthProvider,
-  signInWithPopup,
-} from "firebase/auth";
+import { useMemo, useCallback, useEffect, useState } from "react";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 export default function useFirebaseAuth() {
-  const [user, setUser] = useState(null);
+  const { data: session, status, update } = useSession();
+
   const [token, setToken] = useState("");
   const [role, setRole] = useState(null);
   const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [loadingRole, setLoadingRole] = useState(true);
-  const [authReady, setAuthReady] = useState(false);
+
+  const authReady = status !== "loading";
+  const loading = status === "loading";
+
+  const user = useMemo(() => {
+    if (!session?.user) return null;
+
+    return {
+      uid: session.user.uid,
+      email: session.user.email,
+      displayName: session.user.name,
+      photoURL: session.user.image,
+    };
+  }, [session?.user]);
+
+  const refreshUser = useCallback(async () => {
+    if (!user?.uid) {
+      setUserData(null);
+      setLoadingRole(false);
+      return;
+    }
+
+    setLoadingRole(true);
+
+    try {
+      const res = await fetch(`/api/users/${user.uid}`);
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      const data = await res.json();
+      setUserData(data.data);
+      setRole(data?.data?.role || session?.user?.role || "user");
+      setToken("session-auth");
+    } catch (e) {
+      console.error("AUTH ERROR:", e);
+      setRole(null);
+      setUserData(null);
+      setToken("");
+    } finally {
+      setLoadingRole(false);
+    }
+  }, [user?.uid, session?.user?.role]);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      setLoading(true);
-      setLoadingRole(true);
+    if (!authReady) return;
 
-      if (!firebaseUser) {
-        setUser(null);
-        setToken("");
-        setRole(null);
-        setUserData(null);
-        setLoading(false);
-        setLoadingRole(false);
-        setAuthReady(true);
-        return;
-      }
+    if (!user) {
+      setToken("");
+      setRole(null);
+      setUserData(null);
+      setLoadingRole(false);
+      return;
+    }
 
-      try {
-        // 🔥 FORCE TOKEN REFRESH (important for first login / role update)
-        const tk = await firebaseUser.getIdToken(true);
-        setUser(firebaseUser);
-        setToken(tk);
-
-        // 🔐 READ ROLE FROM CUSTOM CLAIM
-        const tokenResult = await firebaseUser.getIdTokenResult();
-        setRole(tokenResult.claims?.role || "user");
-
-        // 📦 FETCH USER DATA FROM DB (non-security data)
-        const res = await fetch(`/api/users/${firebaseUser.uid}`, {
-          headers: {
-            Authorization: `Bearer ${tk}`,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch user");
-        }
-
-        const data = await res.json();
-        setUserData(data.data);
-      } catch (e) {
-        console.error("AUTH ERROR:", e);
-        setRole(null);
-        setUserData(null);
-      } finally {
-        setLoading(false);
-        setLoadingRole(false);
-        setAuthReady(true);
-      }
-    });
-
-    return () => unsub();
-  }, []);
-
-  /* ================= AUTH ACTIONS ================= */
+    refreshUser();
+  }, [authReady, user, refreshUser]);
 
   const googleLogin = async () => {
-    setLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      const res = await signInWithPopup(auth, provider);
-      return res.user;
-    } finally {
-      setLoading(false);
+    const res = await signIn("google", {
+      redirect: false,
+      callbackUrl: "/",
+    });
+
+    if (res?.error) {
+      throw new Error(res.error);
     }
+
+    if (res?.url) {
+      window.location.href = res.url;
+    }
+
+    return null;
   };
 
   const login = async (email, pass) => {
-    setLoading(true);
-    try {
-      const res = await signInWithEmailAndPassword(auth, email, pass);
-      return res.user;
-    } finally {
-      setLoading(false);
+    const res = await signIn("credentials", {
+      redirect: false,
+      email,
+      password: pass,
+    });
+
+    if (res?.error) {
+      throw new Error("Invalid email or password");
     }
+
+    await update();
+    return true;
   };
 
-  const signup = async (email, pass) => {
-    setLoading(true);
-    try {
-      const res = await createUserWithEmailAndPassword(auth, email, pass);
-      return res.user;
-    } finally {
-      setLoading(false);
+  const signup = async (email, pass, name, referralCode) => {
+    const regRes = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: pass, name, referralCode }),
+    });
+
+    const regJson = await regRes.json();
+
+    if (!regRes.ok) {
+      throw new Error(regJson.error || "Registration failed");
     }
+
+    const loginRes = await signIn("credentials", {
+      redirect: false,
+      email,
+      password: pass,
+    });
+
+    if (loginRes?.error) {
+      throw new Error("Sign-in after registration failed");
+    }
+
+    await update();
+    return true;
   };
 
   const logout = async () => {
-    await signOut(auth);
-    setUser(null);
+    await signOut({ redirect: false });
     setToken("");
     setRole(null);
     setUserData(null);
-    setAuthReady(true);
   };
 
   return {
@@ -120,13 +140,14 @@ export default function useFirebaseAuth() {
     userData,
     authReady,
     token,
-    role,              
+    role,
     loading,
     loadingRole,
     login,
     signup,
     googleLogin,
     logout,
+    refreshUser,
     isLoggedIn: !!user,
   };
 }

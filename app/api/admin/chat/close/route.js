@@ -20,5 +20,10 @@ export async function POST(req) {
     createdAt: new Date(),
   });
 
+  await db.collection("live_chats").updateOne(
+    { chatId },
+    { $set: { status: "closed", updatedAt: new Date() } }
+  );
+
   return Response.json({ ok: true });
 }

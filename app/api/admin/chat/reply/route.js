@@ -1,13 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/verifyToken";
-import { adminDB } from "@/lib/firebaseAdmin";
 import getDB from "@/lib/mongodb";
-
-// 🔥 IMPORTANT FIX
-import {
-  FieldValue,
-  Timestamp,
-} from "firebase-admin/firestore";
 
 export async function POST(req) {
   try {
@@ -33,26 +26,27 @@ export async function POST(req) {
       );
     }
 
-    // ✅ Save admin message
-    await adminDB
-      .collection("chats")
-      .doc(chatId)
-      .collection("messages")
-      .add({
-        senderRole: "admin",
-        type: "text",
-        text,
-        createdAt: FieldValue.serverTimestamp(),
-        seen: false,
-      });
-
-    // ✅ Update chat meta
-    await adminDB.collection("chats").doc(chatId).update({
-      lastMessage: text,
-      lastSender: "admin",
-      unreadForUser: FieldValue.increment(1),
-      updatedAt: FieldValue.serverTimestamp(),
+    await db.collection("live_chat_messages").insertOne({
+      chatId,
+      senderRole: "admin",
+      type: "text",
+      text: text.trim(),
+      seen: false,
+      createdAt: new Date(),
     });
+
+    await db.collection("live_chats").updateOne(
+      { chatId },
+      {
+        $set: {
+          lastMessage: text.trim(),
+          lastSender: "admin",
+          updatedAt: new Date(),
+          status: "open",
+        },
+        $inc: { unreadForUser: 1 },
+      }
+    );
 
     return NextResponse.json({ ok: true });
   } catch (err) {

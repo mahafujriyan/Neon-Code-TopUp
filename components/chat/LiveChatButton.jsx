@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { MessageCircle, X, Loader2 } from "lucide-react";
 import ChatWindow from "./ChatWindow";
-import { auth } from "@/lib/firebaseClient";
-import { ensureAuth } from "@/hooks/useEnsureAuth";
+import useFirebaseAuth from "@/hooks/useFirebaseAuth";
 
 export default function LiveChatButton() {
+  const { user } = useFirebaseAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -18,8 +18,10 @@ export default function LiveChatButton() {
 
     try {
       setLoading(true);
-      // ✅ Guest / Logged-in — both supported
-      await ensureAuth();
+      if (!user) {
+        alert("Please log in to start live chat.");
+        return;
+      }
       setOpen(true);
     } catch (err) {
       console.error("Failed to start live chat:", err);
@@ -30,14 +32,11 @@ export default function LiveChatButton() {
   };
 
   return (
-    <div className="fixed bottom-20 right-10 z-50 flex flex-col items-end">
+      <div className="fixed bottom-20 right-10 z-50 flex flex-col items-end">
       {/* Chat Window Container */}
-      {open && auth.currentUser && (
+      {open && user && (
         <div className="mb-4 transition-all duration-300 transform origin-bottom-right scale-100 opacity-100">
-          <ChatWindow
-            user={auth.currentUser}
-            onClose={() => setOpen(false)}
-          />
+          <ChatWindow user={user} onClose={() => setOpen(false)} />
         </div>
       )}
 

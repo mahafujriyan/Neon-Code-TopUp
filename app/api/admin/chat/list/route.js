@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/verifyToken";
-import { adminDB } from "@/lib/firebaseAdmin";
 import getDB from "@/lib/mongodb";
 
 export async function GET(req) {
@@ -21,17 +20,11 @@ export async function GET(req) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Firebase থেকে ওপেন চ্যাট লিস্ট আনা
-    const snapshot = await adminDB
-      .collection("chats")
-      .where("status", "==", "open")
-      .orderBy("updatedAt", "desc")
-      .get();
-
-    const rawChats = snapshot.docs.map(doc => ({
-      chatId: doc.id,
-      ...doc.data(),
-    }));
+    const rawChats = await db
+      .collection("live_chats")
+      .find({ status: "open" })
+      .sort({ updatedAt: -1 })
+      .toArray();
 
     // MongoDB থেকে ইউজারদের নাম খুঁজে বের করা
     const chatsWithUserInfo = await Promise.all(
