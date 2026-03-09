@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from "react";
-import Swal from "sweetalert2";
 import { ArrowLeft } from "lucide-react";
 
 
@@ -15,6 +14,7 @@ export default function UddoktaPayForm({ token, setMethod }) {
 
 
   const handleUddoktaPay = async () => {
+    const Swal = (await import("sweetalert2")).default;
     if (!amount) return Swal.fire("Error", "Amount required", "error");
     if (!token) return Swal.fire("Error", "You must login first", "error");
 

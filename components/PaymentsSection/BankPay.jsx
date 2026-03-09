@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Swal from "sweetalert2";
 import { ArrowLeft } from "lucide-react";
 
 const banks = [
@@ -52,6 +51,7 @@ export default function BankPayForm({ token, setMethod }) {
 
   // ⭐ Manual Bank Payment
   const handleManualPayment = async () => {
+    const Swal = (await import("sweetalert2")).default;
     if (!amount || !trxId || !screenshot) {
       return Swal.fire("Error", "Please fill all fields", "error");
     }
