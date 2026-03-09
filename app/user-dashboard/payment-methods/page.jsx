@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import useFirebaseAuth from "@/hooks/useFirebaseAuth";
-import { useSearchParams } from "next/navigation";
 import { CreditCard } from "lucide-react";
 import Swal from "sweetalert2";
 import UddoktaPayForm from "@/components/PaymentsSection/UddoktaPay";
@@ -15,17 +14,17 @@ export default function PaymentPage() {
   const [method, setMethod] = useState(null);
 
   const { token } = useFirebaseAuth();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const paymentState = searchParams.get("payment");
+    const params = new URLSearchParams(window.location.search);
+    const paymentState = params.get("payment");
     if (paymentState === "success") {
       Swal.fire("Success", "Payment completed and balance updated.", "success");
     }
     if (paymentState === "failed") {
       Swal.fire("Failed", "Payment verification failed. Please try again.", "error");
     }
-  }, [searchParams]);
+  }, []);
 
   return (
     <div className="p-4 md:p-8 space-y-8 bg-gray-50 min-h-screen text-gray-800">
