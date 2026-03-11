@@ -42,9 +42,15 @@ const UserSidebar = () => {
 
   const menuItems = [
     { name: "Overview", icon: LayoutDashboard, href: "/user-dashboard/overview" },
+     { name: "Our Services", icon: CheckSquare, href: "https://www.neoncode.co/services" },
     { name: "Meta Ads Account", icon: LayoutDashboard, href: "/user-dashboard/meta-ads-account" },
     // { name: "Projects", icon: LayoutGrid, href: "/user-dashboard/projects" },
     // { name: "Tasks", icon: CheckSquare, href: "/user-dashboard/tasks" },
+     {
+      name: "Freepik Premium",
+      icon: Crown,
+      href: "/user-dashboard/freepik-premium",
+    },
     {
       name: "Payment Methods",
       icon: CreditCard,
@@ -60,13 +66,9 @@ const UserSidebar = () => {
       icon: LifeBuoy,
       href: "/user-dashboard/support",
     },
-    {
-      name: "Freepik Premium",
-      icon: Crown,
-      href: "/user-dashboard/freepik-premium",
-    },
-    { name: "Affiliate", icon: Share2, href: "/user-dashboard/affiliate" },
-    { name: "Profile", icon: UserPlus, href: "/user-dashboard/profile" }
+   
+    { name: "Profile", icon: UserPlus, href: "/user-dashboard/profile" },
+      { name: "Affiliate", icon: Share2, href: "/user-dashboard/affiliate" },
   ];
 
   const renderMenu = () => (
