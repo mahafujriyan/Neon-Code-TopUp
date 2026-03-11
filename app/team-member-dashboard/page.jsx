@@ -334,7 +334,7 @@ export default function TeamMemberDashboardPage() {
               <div className="w-full rounded-[1.5rem] border border-sky-400/15 bg-slate-950/70 p-4 text-center sm:rounded-[1.8rem] sm:p-5">
                 <p className="text-xs uppercase tracking-[0.22em] text-sky-100/50">Profile Route</p>
                 <p className="mt-3 break-all text-base font-bold text-white sm:text-lg">
-                  http://neoncode.co/teammember/{previewUsername || "your-username"}
+                 https://neoncode.co/teammember/{previewUsername || "your-username"}
                 </p>
                 <p className="mt-2 text-sm text-sky-100/62">
                   Username stays locked after the first successful save.
