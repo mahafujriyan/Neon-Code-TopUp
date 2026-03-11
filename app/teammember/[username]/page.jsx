@@ -1,5 +1,16 @@
 import Link from "next/link";
-import { BriefcaseBusiness, Globe, Mail, MapPin, Phone, QrCode } from "lucide-react";
+import {
+  BadgeCheck,
+  BriefcaseBusiness,
+  ChevronRight,
+  Download,
+  Globe,
+  Mail,
+  MapPin,
+  Phone,
+  QrCode,
+  Share2,
+} from "lucide-react";
 import {
   FaBehance,
   FaDribbble,
@@ -14,15 +25,8 @@ import {
   FaWhatsapp,
   FaYoutube,
 } from "react-icons/fa";
-import getDB from "@/lib/mongodb";
-import {
-  getDefaultTeamMemberProfile,
-  getTeamMemberPublicUrl,
-  getTeamMemberQrUrl,
-  normalizeTeamMemberUsername,
-  sanitizeTeamMemberProfile,
-} from "@/lib/teamMemberProfile";
-import { findTeamMemberByUsername } from "@/lib/teamMembers";
+import { getDefaultTeamMemberProfile } from "@/lib/teamMemberProfile";
+import { createVCard, getPublicTeamMemberByUsername } from "@/lib/teamMemberPublic";
 
 export const dynamic = "force-dynamic";
 
@@ -41,218 +45,225 @@ const SOCIAL_ITEMS = [
   { key: "facebook", icon: FaFacebookF, label: "Facebook" },
 ];
 
-async function getTeamMember(username) {
-  const normalizedUsername = normalizeTeamMemberUsername(username);
-  if (!normalizedUsername) return null;
-
-  const { db } = await getDB();
-  const teamMemberDoc = await findTeamMemberByUsername(db, normalizedUsername);
-  if (!teamMemberDoc) return null;
-
-  const user = await db.collection("users").findOne({ userId: teamMemberDoc.userId });
-  if (!user || user.role !== "team_member") return null;
-
-  return {
-    user,
-    profile: sanitizeTeamMemberProfile(
-      teamMemberDoc.profile || user.teamMemberProfile || getDefaultTeamMemberProfile(user),
-      user
-    ),
-    publicUrl: getTeamMemberPublicUrl(normalizedUsername),
-    qrUrl: getTeamMemberQrUrl(normalizedUsername),
-  };
-}
-
 export default async function TeamMemberPublicPage({ params }) {
   const { username } = await params;
-  const data = await getTeamMember(username);
+  const data = await getPublicTeamMemberByUsername(username);
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-[#040814] px-4 py-12 text-white sm:px-6 sm:py-16">
-        <div className="mx-auto max-w-3xl rounded-[1.8rem] border border-sky-400/15 bg-slate-950/80 p-6 text-center shadow-2xl sm:rounded-[2.4rem] sm:p-10">
-          <p className="text-sm uppercase tracking-[0.28em] text-sky-200/50">Not Found</p>
+      <div className="min-h-screen bg-[#071006] px-4 py-12 text-[#f4ffd8] sm:px-6 sm:py-16">
+        <div className="mx-auto max-w-3xl rounded-[2rem] border border-[#d4ff4d]/20 bg-[rgba(7,17,6,0.88)] p-6 text-center shadow-[0_30px_100px_rgba(164,255,84,0.08)] sm:p-10">
+          <p className="text-sm uppercase tracking-[0.28em] text-[#dfff84]/60">Not Found</p>
           <h1 className="mt-4 text-3xl font-black sm:text-4xl">Team member profile unavailable</h1>
-          <p className="mt-4 text-slate-300">
-            This public card does not exist, or the username has not been activated yet.
-          </p>
+          <p className="mt-4 text-[#dce8c6]/78">This public card does not exist or is not active yet.</p>
         </div>
       </div>
     );
   }
 
-  const { user, profile, publicUrl, qrUrl } = data;
+  const { profile, user, publicUrl, qrUrl } = data;
   const photo = profile.avatar || user.photo || "https://i.ibb.co/kgp65LMf/profile-avater.png";
-  const experience = profile.experience.length ? profile.experience : getDefaultTeamMemberProfile(user).experience;
-  const projects = profile.projects.length ? profile.projects : getDefaultTeamMemberProfile(user).projects;
+  const fallback = getDefaultTeamMemberProfile(user);
+  const experience = profile.experience.length ? profile.experience : fallback.experience;
+  const projects = profile.projects.length ? profile.projects : fallback.projects;
   const socialLinks = SOCIAL_ITEMS.filter((item) => profile.socialLinks?.[item.key]);
+  const vCard = createVCard(data);
+  const vCardHref = `data:text/vcard;charset=utf-8,${encodeURIComponent(vCard)}`;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_15%_15%,rgba(30,80,210,0.22),transparent_28%),radial-gradient(circle_at_85%_80%,rgba(49,120,255,0.14),transparent_30%),linear-gradient(180deg,#020612,#071126_62%,#040813)] px-3 py-4 text-white sm:px-4 sm:py-6 md:px-6 md:py-8 lg:px-8 lg:py-10">
-      <div className="mx-auto grid max-w-7xl gap-5 lg:gap-6 xl:grid-cols-[340px_1fr] xl:gap-8">
-        <aside className="rounded-[1.8rem] border border-sky-400/15 bg-[linear-gradient(180deg,rgba(7,16,34,0.96),rgba(8,18,36,0.88))] p-4 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-6 sm:rounded-[2.2rem] lg:p-8 lg:rounded-[2.6rem]">
-          <div className="text-center">
-            <div className="mx-auto mb-6 flex h-36 w-36 items-center justify-center rounded-full border border-sky-400/40 bg-[radial-gradient(circle_at_50%_30%,rgba(50,120,255,0.25),rgba(9,16,32,0.95)_68%)] p-2 shadow-[0_0_80px_rgba(40,110,255,0.2)] sm:h-44 sm:w-44 lg:h-56 lg:w-56">
-              <img src={photo} alt={profile.displayName} className="h-full w-full rounded-full object-cover" />
+    <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(213,255,79,0.24),transparent_22%),radial-gradient(circle_at_bottom_left,rgba(183,255,69,0.16),transparent_24%),linear-gradient(180deg,#051006_0%,#081308_36%,#071106_100%)] px-2 py-2 text-[#f7ffd8] sm:px-3 sm:py-3 lg:px-4 lg:py-4">
+      <div className="pointer-events-none absolute inset-0 opacity-60">
+        <div className="absolute left-[4%] top-[8%] h-72 w-72 rounded-full bg-[#d4ff4d]/8 blur-3xl" />
+        <div className="absolute bottom-[10%] right-[4%] h-80 w-80 rounded-full bg-[#ddff72]/10 blur-3xl" />
+        <div className="absolute inset-x-0 top-20 h-px bg-gradient-to-r from-transparent via-[#ddff72]/35 to-transparent" />
+        <div className="absolute bottom-10 left-10 right-10 h-px bg-gradient-to-r from-transparent via-[#d8ff5d]/25 to-transparent" />
+      </div>
+
+      <div className="relative mx-auto flex max-w-[1600px] flex-col overflow-hidden rounded-[2rem] border border-[#d9ff6a]/18 bg-[linear-gradient(180deg,rgba(6,14,6,0.9),rgba(5,11,5,0.82))] shadow-[0_35px_120px_rgba(0,0,0,0.45)] lg:h-[calc(100vh-2rem)] lg:flex-row lg:rounded-[2.5rem]">
+        <aside className="relative border-b border-[#ddff72]/12 px-4 py-6 sm:px-6 lg:sticky lg:top-0 lg:h-full lg:w-[360px] lg:shrink-0 lg:border-b-0 lg:border-r lg:px-7 lg:py-8 xl:w-[390px]">
+          <div className="mx-auto flex h-full max-w-[420px] flex-col">
+            <div className="text-center">
+              <div className="relative mx-auto mb-6 flex h-40 w-40 items-center justify-center rounded-full border border-[#dbff61]/55 bg-[radial-gradient(circle_at_50%_45%,rgba(222,255,114,0.18),rgba(8,19,8,0.98)_70%)] p-[6px] shadow-[0_0_60px_rgba(211,255,87,0.28)] sm:h-48 sm:w-48 lg:h-56 lg:w-56">
+                <img src={photo} alt={profile.displayName} className="h-full w-full rounded-full object-cover" />
+              </div>
+
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{profile.displayName}</h1>
+                <BadgeCheck className="h-7 w-7 text-[#dcff62]" />
+              </div>
+              <p className="mt-2 text-xl text-[#d3f066]">{profile.headline || "Verified Team Member"}</p>
             </div>
-            <h1 className="text-3xl font-black sm:text-4xl">{profile.displayName}</h1>
-            <p className="mt-3 text-base text-sky-300 sm:text-lg">{profile.headline || "Verified Team Member"}</p>
-          </div>
 
-          <div className="mt-8 space-y-4">
-            <Badge icon={BriefcaseBusiness} label={profile.employeeCode || user.userId.slice(-8)} value={profile.department || "Neon Team"} />
+            <div className="mt-8 space-y-5">
+              <GlassBadge
+                icon={BriefcaseBusiness}
+                primary={profile.employeeCode || user.userId.slice(-8)}
+                secondary={profile.department || "Neon Code"}
+              />
 
-            <div className="rounded-[1.4rem] border border-sky-400/15 bg-slate-900/65 p-4 sm:rounded-[1.8rem] sm:p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-sky-100/45">Scan To Connect</p>
-              <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <Link href={publicUrl} className="text-lg font-bold text-sky-300 sm:text-xl">
-                    Share Profile
+              <a
+                href={vCardHref}
+                download={`${data.username || "team-member"}.vcf`}
+                className="flex min-h-14 items-center justify-center rounded-[1.55rem] border border-[#d9ff6c]/45 bg-[linear-gradient(180deg,rgba(222,255,94,0.16),rgba(181,255,68,0.05))] px-5 py-4 text-2xl font-black text-[#efffc7] shadow-[0_0_26px_rgba(195,255,90,0.18)] transition hover:border-[#ecff98]/70"
+              >
+                Save Contact
+              </a>
+
+              <div className="rounded-[1.55rem] border border-[#d8ff5d]/18 bg-[rgba(10,21,10,0.74)] p-4 shadow-[0_0_24px_rgba(186,255,79,0.05)]">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.22em] text-[#f2ffbb]/58">Scan To Connect</p>
+                    <div className="mt-4 flex items-center gap-2 text-2xl font-black text-[#d8ff67]">
+                      <Share2 className="h-5 w-5" />
+                      Share Profile
+                    </div>
+                  </div>
+                  <img src={qrUrl} alt="QR code" className="h-24 w-24 rounded-2xl bg-white p-2 shadow-lg" />
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <a
+                    href={qrUrl}
+                    download={`${data.username}-qr.png`}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#d8ff5d]/28 px-4 py-3 text-sm font-bold text-[#efffc8]"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download QR
+                  </a>
+                  <Link
+                    href={publicUrl}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#d8ff5d]/12 px-4 py-3 text-sm font-bold text-[#edffc0]"
+                  >
+                    <QrCode className="h-4 w-4" />
+                    Open Link
                   </Link>
-                  <p className="mt-2 text-sm text-slate-300">QR opens your Neon Code team page directly.</p>
                 </div>
-                <img src={qrUrl} alt="QR code" className="h-24 w-24 self-center rounded-2xl bg-white p-2 sm:self-auto" />
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
+                {socialLinks.map((item) => (
+                  <a
+                    key={item.key}
+                    href={profile.socialLinks[item.key]}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={item.label}
+                    className="flex h-14 w-14 items-center justify-center rounded-full border border-[#d8ff5d]/22 bg-[rgba(16,30,13,0.82)] text-[#dffb76] shadow-[0_0_20px_rgba(195,255,89,0.06)] transition hover:border-[#ebff9b]/60 hover:text-[#fbffd6]"
+                  >
+                    <item.icon size={22} />
+                  </a>
+                ))}
               </div>
             </div>
-
-            {socialLinks.length ? (
-              <div className="rounded-[1.4rem] border border-sky-400/15 bg-slate-900/65 p-4 sm:rounded-[1.8rem] sm:p-5">
-                <p className="text-xs font-bold uppercase tracking-[0.24em] text-sky-100/45">Connect</p>
-                <div className="mt-4 flex flex-wrap gap-3">
-                  {socialLinks.map((item) => (
-                    <a
-                      key={item.key}
-                      href={profile.socialLinks[item.key]}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex h-12 w-12 items-center justify-center rounded-full border border-sky-400/15 bg-slate-950/70 text-sky-200 transition hover:border-sky-300/30 hover:text-white"
-                      aria-label={item.label}
-                    >
-                      <item.icon size={18} />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </div>
         </aside>
 
-        <main className="rounded-[1.8rem] border border-sky-400/15 bg-[linear-gradient(180deg,rgba(7,16,34,0.96),rgba(8,18,36,0.88))] p-4 shadow-[0_30px_80px_rgba(0,0,0,0.45)] sm:p-6 sm:rounded-[2.2rem] lg:p-8 lg:rounded-[2.6rem]">
-          <div className="mb-8 flex items-center gap-3 text-sky-100/70">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/15 text-sky-300">✓</span>
-            Verified Employee
-          </div>
+        <main className="min-h-0 flex-1 px-4 py-6 sm:px-6 lg:overflow-y-auto lg:px-8 lg:py-8 xl:px-10">
+          <div className="mx-auto max-w-5xl pb-10">
+            <div className="mb-7 flex items-center gap-3 text-[#ddff73]">
+              <BadgeCheck className="h-6 w-6" />
+              <span className="text-base font-medium tracking-wide">Verified Employee</span>
+            </div>
 
-          <h2 className="text-3xl font-black sm:text-4xl">{profile.company || "Neon Code"}</h2>
+            <h2 className="text-4xl font-black tracking-tight text-[#fbffd7] sm:text-5xl">
+              {profile.company || "Neon Code"}
+            </h2>
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-2">
-            <InfoCard icon={Phone} label="Phone" value={profile.phone || "Not provided"} href={profile.phone ? `tel:${profile.phone}` : ""} />
-            <InfoCard icon={Mail} label="Email" value={profile.publicEmail || "Not provided"} href={profile.publicEmail ? `mailto:${profile.publicEmail}` : ""} />
-            <InfoCard icon={MapPin} label="Location" value={profile.location || "Not provided"} />
-            <InfoCard icon={Globe} label="Website" value={profile.website || "Not provided"} href={profile.website || ""} />
-          </div>
+            <div className="mt-7 grid gap-4 xl:grid-cols-2">
+              <InfoCard icon={Phone} label="Phone" value={profile.phone || "Not provided"} href={profile.phone ? `tel:${profile.phone}` : ""} />
+              <InfoCard icon={Mail} label="Email" value={profile.publicEmail || "Not provided"} href={profile.publicEmail ? `mailto:${profile.publicEmail}` : ""} />
+              <InfoCard icon={MapPin} label="Location" value={profile.location || "Not provided"} />
+              <InfoCard icon={Globe} label="Website" value={profile.website || "Not provided"} href={profile.website || ""} />
+            </div>
 
-          <div className="mt-8 grid gap-8 xl:grid-cols-[1.3fr_0.9fr]">
-            <section className="space-y-8">
-              <ContentBlock title="About">
-                <p className="max-w-3xl text-base leading-8 text-slate-200/92 sm:text-lg sm:leading-9">
-                  {profile.about || "This team member has not added a public introduction yet."}
-                </p>
-              </ContentBlock>
+            <div className="mt-9 grid gap-10 border-t border-[#d8ff5d]/12 pt-8 xl:grid-cols-[1.08fr_0.82fr]">
+              <section className="space-y-10">
+                <Section title="About">
+                  <p className="max-w-3xl text-xl leading-10 text-[#eef7d0]/88">
+                    {profile.about || "This team member has not added a public introduction yet."}
+                  </p>
+                </Section>
 
-              <ContentBlock title="Skills">
-                <div className="flex flex-wrap gap-3">
-                  {(profile.skills.length ? profile.skills : ["Team Member"]).map((skill) => (
-                    <span
-                      key={skill}
-                      className="rounded-2xl border border-sky-400/18 bg-slate-900/65 px-4 py-2 text-sm font-medium text-slate-100"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </ContentBlock>
-
-              {socialLinks.length ? (
-                <ContentBlock title="Social Links">
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    {socialLinks.map((item) => (
-                      <a
-                        key={item.key}
-                        href={profile.socialLinks[item.key]}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex min-w-0 items-center gap-4 rounded-[1.4rem] border border-sky-400/15 bg-slate-900/55 p-4 transition hover:border-sky-300/25 sm:rounded-[1.8rem]"
+                <Section title="Skills">
+                  <div className="flex flex-wrap gap-3">
+                    {(profile.skills.length ? profile.skills : ["Team Member"]).map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-2xl border border-[#dbff65]/18 bg-[rgba(18,30,15,0.72)] px-4 py-2.5 text-lg text-[#f4ffd4] shadow-[0_0_20px_rgba(185,255,75,0.04)]"
                       >
-                        <div className="rounded-2xl bg-sky-500/10 p-3 text-sky-300">
-                          <item.icon size={18} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs uppercase tracking-[0.18em] text-sky-100/45">{item.label}</p>
-                          <p className="mt-1 truncate text-base font-semibold text-slate-100">{profile.socialLinks[item.key]}</p>
-                        </div>
-                      </a>
+                        {skill}
+                      </span>
                     ))}
                   </div>
-                </ContentBlock>
-              ) : null}
+                </Section>
 
-              <ContentBlock title="Projects">
-                <div className="space-y-4">
-                  {(projects.length ? projects : [{ title: "Project details coming soon", description: "" }]).map((item, index) => (
-                    <div key={`${item.title}-${index}`} className="rounded-[1.4rem] border border-sky-400/15 bg-slate-900/55 p-4 sm:rounded-[1.8rem] sm:p-5">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <h3 className="text-xl font-bold sm:text-2xl">{item.title || "Untitled project"}</h3>
-                        {item.duration ? (
-                          <span className="rounded-xl border border-sky-400/15 px-3 py-1 text-sm text-sky-100/75">
-                            {item.duration}
-                          </span>
-                        ) : null}
-                      </div>
-                      {item.company ? <p className="mt-2 text-sky-300">{item.company}</p> : null}
-                      {item.description ? <p className="mt-3 text-sm leading-7 text-slate-300 sm:text-base sm:leading-8">{item.description}</p> : null}
-                    </div>
-                  ))}
-                </div>
-              </ContentBlock>
-            </section>
-
-            <section className="space-y-8">
-              <ContentBlock title="Experience">
-                <div className="space-y-8">
-                  {(experience.length ? experience : [{ title: "Experience details coming soon", company: "", duration: "", description: "" }]).map(
-                    (item, index) => (
-                      <div key={`${item.title}-${index}`} className="relative pl-6 sm:pl-8">
-                        <span className="absolute left-0 top-2 h-3 w-3 rounded-full bg-sky-400 shadow-[0_0_18px_rgba(79,160,255,0.9)]" />
-                        <div className="absolute left-[5px] top-5 h-[calc(100%+1rem)] w-px bg-sky-400/25 last:hidden" />
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <h3 className="text-xl font-bold sm:text-2xl">{item.title || "Experience"}</h3>
-                            {item.company ? <p className="mt-2 text-lg text-slate-300 sm:text-xl">{item.company}</p> : null}
-                          </div>
-                          {item.duration ? (
-                            <span className="rounded-xl border border-sky-400/15 bg-slate-900/65 px-4 py-2 text-sm text-sky-100/75">
-                              {item.duration}
-                            </span>
-                          ) : null}
-                        </div>
-                        {item.description ? <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-base sm:leading-8">{item.description}</p> : null}
-                      </div>
-                    )
-                  )}
-                </div>
-              </ContentBlock>
-
-              <ContentBlock title="Profile Link">
-                <div className="rounded-[1.4rem] border border-sky-400/15 bg-slate-900/55 p-4 sm:rounded-[1.8rem] sm:p-5">
-                  <div className="mb-3 flex items-center gap-2 text-sky-300">
-                    <QrCode size={18} />
-                    neoncode.co public route
+                <Section title="Projects">
+                  <div className="space-y-4">
+                    {(projects.length ? projects : [{ title: "Project details coming soon", description: "" }]).map((item, index) => (
+                      <ProjectCard
+                        key={`${item.title}-${index}`}
+                        title={item.title || "Untitled Project"}
+                        company={item.company}
+                        duration={item.duration}
+                        description={item.description}
+                      />
+                    ))}
                   </div>
-                  <p className="break-all text-base text-slate-200">{publicUrl}</p>
-                </div>
-              </ContentBlock>
-            </section>
+                </Section>
+              </section>
+
+              <section className="space-y-10 border-t border-[#d8ff5d]/12 pt-8 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
+                <Section title="Experience">
+                  <div className="space-y-8">
+                    {(experience.length ? experience : [{ title: "Experience details coming soon", company: "", duration: "", description: "" }]).map(
+                      (item, index) => (
+                        <TimelineCard
+                          key={`${item.title}-${index}`}
+                          title={item.title || "Experience"}
+                          company={item.company}
+                          duration={item.duration}
+                          description={item.description}
+                          isLast={index === experience.length - 1}
+                        />
+                      )
+                    )}
+                  </div>
+                </Section>
+
+                {socialLinks.length ? (
+                  <Section title="Connect">
+                    <div className="space-y-4">
+                      {socialLinks.map((item) => (
+                        <a
+                          key={item.key}
+                          href={profile.socialLinks[item.key]}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex min-w-0 items-center justify-between gap-4 rounded-[1.6rem] border border-[#d8ff5d]/18 bg-[rgba(14,24,12,0.72)] p-4 transition hover:border-[#ebff98]/42"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-xs uppercase tracking-[0.22em] text-[#dff095]/56">{item.label}</p>
+                            <p className="mt-2 truncate text-lg font-bold text-[#fbffd9]">{profile.socialLinks[item.key]}</p>
+                          </div>
+                          <div className="rounded-2xl bg-[#d9ff64]/10 p-3 text-[#deff6a]">
+                            <item.icon size={20} />
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </Section>
+                ) : null}
+
+                <Section title="Profile Link">
+                  <div className="rounded-[1.6rem] border border-[#d8ff5d]/18 bg-[rgba(14,24,12,0.72)] p-5">
+                    <div className="mb-3 flex items-center gap-2 text-[#e0ff74]">
+                      <QrCode className="h-5 w-5" />
+                      neoncode.co public route
+                    </div>
+                    <p className="break-all text-lg text-[#f5ffd8]">{publicUrl}</p>
+                  </div>
+                </Section>
+              </section>
+            </div>
           </div>
         </main>
       </div>
@@ -260,15 +271,15 @@ export default async function TeamMemberPublicPage({ params }) {
   );
 }
 
-function Badge({ icon: Icon, label, value }) {
+function GlassBadge({ icon: Icon, primary, secondary }) {
   return (
-    <div className="flex items-center gap-4 rounded-[1.4rem] border border-sky-400/15 bg-slate-900/65 p-4 sm:rounded-[1.8rem] sm:p-5">
-      <div className="rounded-2xl bg-sky-500/10 p-3 text-sky-300">
-        <Icon size={22} />
+    <div className="flex items-center gap-4 rounded-[1.55rem] border border-[#d8ff5d]/20 bg-[rgba(11,22,10,0.76)] p-4 shadow-[0_0_24px_rgba(190,255,84,0.05)]">
+      <div className="rounded-2xl bg-[#d8ff5d]/10 p-3 text-[#deff73]">
+        <Icon className="h-6 w-6" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs uppercase tracking-[0.2em] text-sky-100/40">{label}</p>
-        <p className="mt-1 break-words text-xl text-slate-100 sm:text-2xl">{value}</p>
+        <p className="break-words text-2xl font-bold text-[#f9ffd7]">{primary}</p>
+        <p className="mt-1 text-xl text-[#d4ef75]">{secondary}</p>
       </div>
     </div>
   );
@@ -276,13 +287,13 @@ function Badge({ icon: Icon, label, value }) {
 
 function InfoCard({ icon: Icon, label, value, href = "" }) {
   const content = (
-    <div className="flex h-full min-w-0 items-center gap-4 rounded-[1.4rem] border border-sky-400/15 bg-slate-900/50 p-4 transition hover:border-sky-300/25 sm:rounded-[1.8rem] sm:p-5">
-      <div className="rounded-2xl bg-sky-500/10 p-3 text-sky-300">
-        <Icon size={20} />
+    <div className="flex min-h-[124px] min-w-0 items-center gap-4 rounded-[1.7rem] border border-[#d8ff5d]/20 bg-[rgba(10,20,9,0.76)] px-5 py-5 shadow-[0_0_22px_rgba(196,255,82,0.05)]">
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#d8ff5d]/10 text-[#e1ff73]">
+        <Icon className="h-6 w-6" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs uppercase tracking-[0.18em] text-sky-100/45">{label}</p>
-        <p className="mt-1 break-words text-lg font-bold text-slate-100 sm:text-xl">{value}</p>
+        <p className="text-xs uppercase tracking-[0.22em] text-[#dce88a]/62">{label}</p>
+        <p className="mt-2 break-words text-2xl font-bold text-[#f7ffd7]">{value}</p>
       </div>
     </div>
   );
@@ -296,11 +307,51 @@ function InfoCard({ icon: Icon, label, value, href = "" }) {
   );
 }
 
-function ContentBlock({ title, children }) {
+function Section({ title, children }) {
   return (
-    <section className="border-t border-sky-400/12 pt-6 sm:pt-8">
-      <h3 className="mb-5 text-sm font-black uppercase tracking-[0.25em] text-sky-100/60">{title}</h3>
+    <section>
+      <h3 className="mb-5 text-sm font-black uppercase tracking-[0.28em] text-[#e6ff7d]">{title}</h3>
       {children}
     </section>
+  );
+}
+
+function TimelineCard({ title, company, duration, description, isLast }) {
+  return (
+    <div className="relative pl-8">
+      <span className="absolute left-0 top-2 h-3.5 w-3.5 rounded-full bg-[#ddff73] shadow-[0_0_22px_rgba(221,255,115,0.92)]" />
+      {!isLast ? <span className="absolute left-[6px] top-6 h-[calc(100%+1.2rem)] w-px bg-[#d7ff5a]/28" /> : null}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h4 className="text-3xl font-black text-[#fbffd7]">{title}</h4>
+          {company ? <p className="mt-3 text-2xl text-[#d6e88b]">{company}</p> : null}
+        </div>
+        {duration ? (
+          <span className="rounded-xl border border-[#d8ff5d]/22 bg-[#d8ff5d]/10 px-4 py-2 text-sm font-bold text-[#efffb6]">
+            {duration}
+          </span>
+        ) : null}
+      </div>
+      {description ? <p className="mt-4 text-xl leading-10 text-[#edf5d3]/82">{description}</p> : null}
+    </div>
+  );
+}
+
+function ProjectCard({ title, company, duration, description }) {
+  return (
+    <div className="rounded-[1.7rem] border border-[#d8ff5d]/20 bg-[rgba(10,20,9,0.76)] p-5 shadow-[0_0_22px_rgba(196,255,82,0.05)]">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="rounded-2xl bg-[#d8ff5d]/10 p-3 text-[#deff73]">
+            <BriefcaseBusiness className="h-5 w-5" />
+          </div>
+          <h4 className="text-2xl font-black text-[#fbffd7]">{title}</h4>
+        </div>
+        <ChevronRight className="h-5 w-5 text-[#dcff63]" />
+      </div>
+      {company ? <p className="mt-3 text-xl text-[#d6e88b]">{company}</p> : null}
+      {duration ? <p className="mt-2 text-sm uppercase tracking-[0.2em] text-[#d8ef8a]/66">{duration}</p> : null}
+      {description ? <p className="mt-4 text-xl leading-10 text-[#edf5d3]/82">{description}</p> : null}
+    </div>
   );
 }
