@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import getDB from "@/lib/mongodb";
 import { verifyToken } from "@/lib/verifyToken";
 import {
-  getDefaultTeamMemberProfile,
   getTeamMemberPublicUrl,
   getTeamMemberQrUrl,
   normalizeTeamMemberUsername,
-  sanitizeTeamMemberProfile,
 } from "@/lib/teamMemberProfile";
+import {
+  findTeamMemberByUserId,
+  findTeamMemberByUsername,
+  getTeamMemberView,
+  upsertTeamMemberDoc,
+} from "@/lib/teamMembers";
 
 async function getCurrentUser(db, uid) {
   return db.collection("users").findOne({ userId: uid });
@@ -31,13 +35,15 @@ export async function GET(req) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const username = user.teamMemberUsername ?? "";
+    const teamMemberDoc = await findTeamMemberByUserId(db, decoded.uid);
+    const username = teamMemberDoc?.username ?? user.teamMemberUsername ?? "";
+    const { profile } = getTeamMemberView(user, teamMemberDoc);
 
     return NextResponse.json({
       ok: true,
       data: {
         username,
-        profile: sanitizeTeamMemberProfile(user.teamMemberProfile, user),
+        profile,
         publicUrl: getTeamMemberPublicUrl(username),
         qrUrl: getTeamMemberQrUrl(username),
         usernameLocked: Boolean(username),
@@ -68,8 +74,11 @@ export async function POST(req) {
     }
 
     const body = await req.json();
+    const existingTeamMemberDoc = await findTeamMemberByUserId(db, decoded.uid);
     const incomingUsername = normalizeTeamMemberUsername(body?.username);
-    const currentUsername = normalizeTeamMemberUsername(user.teamMemberUsername);
+    const currentUsername = normalizeTeamMemberUsername(
+      existingTeamMemberDoc?.username || user.teamMemberUsername
+    );
 
     if (!currentUsername && !incomingUsername) {
       return NextResponse.json({ error: "A unique username is required" }, { status: 400 });
@@ -84,31 +93,39 @@ export async function POST(req) {
       return NextResponse.json({ error: "Username must be at least 3 characters" }, { status: 400 });
     }
 
-    const usernameOwner = await db.collection("users").findOne(
-      { teamMemberUsername: finalUsername },
-      { projection: { userId: 1 } }
-    );
+    const usernameOwner = await findTeamMemberByUsername(db, finalUsername);
 
     if (usernameOwner && usernameOwner.userId !== user.userId) {
       return NextResponse.json({ error: "That username is already taken" }, { status: 409 });
     }
 
-    const sanitizedProfile = sanitizeTeamMemberProfile(body?.profile, user);
-    const updatePayload = {
-      teamMemberUsername: finalUsername,
-      teamMemberProfile: sanitizedProfile,
-      updatedAt: new Date(),
-    };
+    const savedTeamMemberDoc = await upsertTeamMemberDoc(
+      db,
+      user,
+      finalUsername,
+      body?.profile || existingTeamMemberDoc?.profile || user.teamMemberProfile
+    );
 
-    await db.collection("users").updateOne({ userId: user.userId }, { $set: updatePayload });
+    await db.collection("users").updateOne(
+      { userId: user.userId },
+      {
+        $set: {
+          teamMemberUsername: savedTeamMemberDoc.username,
+          updatedAt: new Date(),
+        },
+        $unset: {
+          teamMemberProfile: "",
+        },
+      }
+    );
 
     return NextResponse.json({
       ok: true,
       data: {
-        username: finalUsername,
-        profile: sanitizedProfile,
-        publicUrl: getTeamMemberPublicUrl(finalUsername),
-        qrUrl: getTeamMemberQrUrl(finalUsername),
+        username: savedTeamMemberDoc.username,
+        profile: savedTeamMemberDoc.profile,
+        publicUrl: getTeamMemberPublicUrl(savedTeamMemberDoc.username),
+        qrUrl: getTeamMemberQrUrl(savedTeamMemberDoc.username),
         usernameLocked: true,
       },
     });

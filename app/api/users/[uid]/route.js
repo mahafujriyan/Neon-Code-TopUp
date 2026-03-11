@@ -1,6 +1,7 @@
 import getDB from "@/lib/mongodb";
 import { verifyToken } from "@/lib/verifyToken";
 import { getTeamMemberPublicUrl, getTeamMemberQrUrl } from "@/lib/teamMemberProfile";
+import { findTeamMemberByUserId, getTeamMemberView } from "@/lib/teamMembers";
 
 export async function GET(req, { params }) {
   try {
@@ -16,6 +17,8 @@ export async function GET(req, { params }) {
 
     const { db } = await getDB();
     const user = await db.collection("users").findOne({ userId: uid });
+    const teamMemberDoc = await findTeamMemberByUserId(db, uid);
+    const teamMemberView = getTeamMemberView(user || {}, teamMemberDoc);
 
     if (!user) {
       return Response.json({ error: "User not found" }, { status: 404 });
@@ -57,10 +60,10 @@ export async function GET(req, { params }) {
           allowTopupAction: user.metaAdsConfig?.allowTopupAction ?? true,
           remainingBudgetOverride: user.metaAdsConfig?.remainingBudgetOverride ?? null,
         },
-        teamMemberUsername: user.teamMemberUsername ?? "",
-        teamMemberProfile: user.teamMemberProfile ?? null,
-        teamMemberPublicUrl: getTeamMemberPublicUrl(user.teamMemberUsername),
-        teamMemberQrUrl: getTeamMemberQrUrl(user.teamMemberUsername),
+        teamMemberUsername: teamMemberView.username || user.teamMemberUsername || "",
+        teamMemberProfile: teamMemberView.profile,
+        teamMemberPublicUrl: getTeamMemberPublicUrl(teamMemberView.username || user.teamMemberUsername),
+        teamMemberQrUrl: getTeamMemberQrUrl(teamMemberView.username || user.teamMemberUsername),
         createdAt: user.createdAt,
         updatedAt: user.updatedAt ?? user.createdAt,
       },

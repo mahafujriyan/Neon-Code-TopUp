@@ -3,8 +3,13 @@ import getDB from "@/lib/mongodb";
 import { verifyToken } from "@/lib/verifyToken";
 import {
   normalizeTeamMemberUsername,
-  sanitizeTeamMemberProfile,
 } from "@/lib/teamMemberProfile";
+import {
+  deleteTeamMemberDoc,
+  findTeamMemberByUserId,
+  findTeamMemberByUsername,
+  upsertTeamMemberDoc,
+} from "@/lib/teamMembers";
 
 const ALLOWED_ROLES = ["user", "manager", "admin", "team_member"];
 const ALLOWED_STATUS = ["active", "pending", "inactive"];
@@ -163,18 +168,19 @@ export async function POST(req) {
       );
     }
 
+    let normalizedTeamMemberUsername = normalizeTeamMemberUsername(
+      teamMemberUsername !== undefined ? teamMemberUsername : target.teamMemberUsername
+    );
+
     if (teamMemberUsername !== undefined) {
-      const normalizedUsername = normalizeTeamMemberUsername(teamMemberUsername);
+      const normalizedUsername = normalizedTeamMemberUsername;
 
       if (normalizedUsername) {
         if (normalizedUsername.length < 3) {
           return NextResponse.json({ error: "Team member username must be at least 3 characters" }, { status: 400 });
         }
 
-        const usernameOwner = await db.collection("users").findOne(
-          { teamMemberUsername: normalizedUsername },
-          { projection: { userId: 1 } }
-        );
+        const usernameOwner = await findTeamMemberByUsername(db, normalizedUsername);
 
         if (usernameOwner && usernameOwner.userId !== userId) {
           return NextResponse.json({ error: "That team member username is already taken" }, { status: 409 });
@@ -184,11 +190,64 @@ export async function POST(req) {
       updatePayload.teamMemberUsername = normalizedUsername;
     }
 
-    if (teamMemberProfile !== undefined) {
-      updatePayload.teamMemberProfile = sanitizeTeamMemberProfile(teamMemberProfile, target);
-    }
+    const nextRole = updatePayload.role || target.role;
 
-    await db.collection("users").updateOne({ userId }, { $set: updatePayload });
+    await db.collection("users").updateOne(
+      { userId },
+      {
+        $set: updatePayload,
+        ...(nextRole === "team_member"
+          ? {}
+          : {
+              $unset: {
+                teamMemberProfile: "",
+              },
+            }),
+      }
+    );
+
+    const refreshedUser = await db.collection("users").findOne({ userId });
+
+    if (nextRole === "team_member") {
+      const existingTeamMemberDoc = await findTeamMemberByUserId(db, userId);
+      const fallbackProfile = teamMemberProfile !== undefined ? teamMemberProfile : existingTeamMemberDoc?.profile;
+      const finalUsername =
+        normalizedTeamMemberUsername ||
+        existingTeamMemberDoc?.username ||
+        refreshedUser?.teamMemberUsername ||
+        "";
+
+      if (finalUsername || teamMemberProfile !== undefined || existingTeamMemberDoc) {
+        const savedTeamMemberDoc = await upsertTeamMemberDoc(
+          db,
+          refreshedUser,
+          finalUsername,
+          fallbackProfile
+        );
+
+        await db.collection("users").updateOne(
+          { userId },
+          {
+            $set: {
+              teamMemberUsername: savedTeamMemberDoc.username,
+              updatedAt: new Date(),
+            },
+            $unset: {
+              teamMemberProfile: "",
+            },
+          }
+        );
+      }
+    } else {
+      await deleteTeamMemberDoc(db, userId);
+      await db.collection("users").updateOne(
+        { userId },
+        {
+          $set: { teamMemberUsername: "" },
+          $unset: { teamMemberProfile: "" },
+        }
+      );
+    }
 
     return NextResponse.json({ ok: true, message: "User updated successfully" });
   } catch (err) {

@@ -22,6 +22,7 @@ import {
   normalizeTeamMemberUsername,
   sanitizeTeamMemberProfile,
 } from "@/lib/teamMemberProfile";
+import { findTeamMemberByUsername } from "@/lib/teamMembers";
 
 export const dynamic = "force-dynamic";
 
@@ -45,12 +46,18 @@ async function getTeamMember(username) {
   if (!normalizedUsername) return null;
 
   const { db } = await getDB();
-  const user = await db.collection("users").findOne({ teamMemberUsername: normalizedUsername });
+  const teamMemberDoc = await findTeamMemberByUsername(db, normalizedUsername);
+  if (!teamMemberDoc) return null;
+
+  const user = await db.collection("users").findOne({ userId: teamMemberDoc.userId });
   if (!user || user.role !== "team_member") return null;
 
   return {
     user,
-    profile: sanitizeTeamMemberProfile(user.teamMemberProfile, user),
+    profile: sanitizeTeamMemberProfile(
+      teamMemberDoc.profile || user.teamMemberProfile || getDefaultTeamMemberProfile(user),
+      user
+    ),
     publicUrl: getTeamMemberPublicUrl(normalizedUsername),
     qrUrl: getTeamMemberQrUrl(normalizedUsername),
   };
