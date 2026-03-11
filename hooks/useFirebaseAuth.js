@@ -1,15 +1,18 @@
-﻿"use client";
+"use client";
 
-import { useMemo, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 
-export default function useFirebaseAuth() {
+const FirebaseAuthContext = createContext(null);
+
+function useProvideFirebaseAuth() {
   const { data: session, status, update } = useSession();
 
   const [token, setToken] = useState("");
   const [role, setRole] = useState(null);
   const [userData, setUserData] = useState(null);
   const [loadingRole, setLoadingRole] = useState(true);
+  const userRequestRef = useRef(null);
 
   const authReady = status !== "loading";
   const loading = status === "loading";
@@ -27,38 +30,50 @@ export default function useFirebaseAuth() {
 
   const refreshUser = useCallback(async () => {
     if (!user?.uid) {
+      userRequestRef.current = null;
       setUserData(null);
       setLoadingRole(false);
-      return;
+      return null;
+    }
+
+    if (userRequestRef.current) {
+      return userRequestRef.current;
     }
 
     setLoadingRole(true);
 
-    try {
-      const res = await fetch(`/api/users/${user.uid}`);
+    const request = (async () => {
+      try {
+        const res = await fetch(`/api/users/${user.uid}`, { cache: "no-store" });
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch user");
+        if (!res.ok) {
+          throw new Error("Failed to fetch user");
+        }
+
+        const data = await res.json();
+        setUserData(data.data);
+        setRole(data?.data?.role || session?.user?.role || "user");
+        setToken("session-auth");
+      } catch (e) {
+        console.error("AUTH ERROR:", e);
+        setRole(null);
+        setUserData(null);
+        setToken("");
+      } finally {
+        userRequestRef.current = null;
+        setLoadingRole(false);
       }
+    })();
 
-      const data = await res.json();
-      setUserData(data.data);
-      setRole(data?.data?.role || session?.user?.role || "user");
-      setToken("session-auth");
-    } catch (e) {
-      console.error("AUTH ERROR:", e);
-      setRole(null);
-      setUserData(null);
-      setToken("");
-    } finally {
-      setLoadingRole(false);
-    }
-  }, [user?.uid, session?.user?.role]);
+    userRequestRef.current = request;
+    return request;
+  }, [session?.user?.role, user?.uid]);
 
   useEffect(() => {
     if (!authReady) return;
 
     if (!user) {
+      userRequestRef.current = null;
       setToken("");
       setRole(null);
       setUserData(null);
@@ -67,7 +82,7 @@ export default function useFirebaseAuth() {
     }
 
     refreshUser();
-  }, [authReady, user, refreshUser]);
+  }, [authReady, refreshUser, user]);
 
   const googleLogin = async () => {
     const res = await signIn("google", {
@@ -129,6 +144,7 @@ export default function useFirebaseAuth() {
   };
 
   const logout = async (callbackUrl = "/login") => {
+    userRequestRef.current = null;
     setToken("");
     setRole(null);
     setUserData(null);
@@ -142,19 +158,38 @@ export default function useFirebaseAuth() {
     }
   };
 
-  return {
-    user,
-    userData,
-    authReady,
-    token,
-    role,
-    loading,
-    loadingRole,
-    login,
-    signup,
-    googleLogin,
-    logout,
-    refreshUser,
-    isLoggedIn: !!user,
-  };
+  return useMemo(
+    () => ({
+      user,
+      userData,
+      authReady,
+      token,
+      role,
+      loading,
+      loadingRole,
+      login,
+      signup,
+      googleLogin,
+      logout,
+      refreshUser,
+      isLoggedIn: !!user,
+    }),
+    [authReady, loading, loadingRole, refreshUser, role, token, user, userData]
+  );
+}
+
+export function FirebaseAuthProvider({ children }) {
+  const value = useProvideFirebaseAuth();
+
+  return <FirebaseAuthContext.Provider value={value}>{children}</FirebaseAuthContext.Provider>;
+}
+
+export default function useFirebaseAuth() {
+  const context = useContext(FirebaseAuthContext);
+
+  if (!context) {
+    throw new Error("useFirebaseAuth must be used within FirebaseAuthProvider");
+  }
+
+  return context;
 }

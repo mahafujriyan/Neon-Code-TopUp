@@ -18,12 +18,13 @@ const statusColor = (status) => {
 };
 
 export default function AllUsersPage() {
-  const { token } = useFirebaseAuth();
+  const { token, user } = useFirebaseAuth();
 
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [deletingUserId, setDeletingUserId] = useState("");
 
   /* ================= LOAD USERS ================= */
   const loadUsers = async () => {
@@ -74,6 +75,46 @@ export default function AllUsersPage() {
     link.href = url;
     link.download = `User_List_${new Date().toLocaleDateString()}.csv`;
     link.click();
+  };
+
+  const handleDeleteUser = async (targetUser) => {
+    if (!token || !targetUser?.userId) return;
+
+    if (targetUser.userId === user?.uid) {
+      window.alert("You cannot delete your own admin account.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${targetUser.email || targetUser.userId}? This action cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingUserId(targetUser.userId);
+
+    try {
+      const res = await fetch("/api/admin/users/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: targetUser.userId }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Failed to delete user");
+
+      if (selectedUser?.userId === targetUser.userId) {
+        setSelectedUser(null);
+      }
+
+      await loadUsers();
+    } catch (err) {
+      window.alert(err.message || "Failed to delete user");
+    } finally {
+      setDeletingUserId("");
+    }
   };
 
   return (
@@ -202,9 +243,13 @@ export default function AllUsersPage() {
                         </button>
 
                         <button
-                          disabled
-                          onClick={(e) => e.stopPropagation()}
-                          className="p-2 text-red-300 hover:text-red-500 transition-colors cursor-not-allowed"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteUser(u);
+                          }}
+                          disabled={deletingUserId === u.userId || u.userId === user?.uid}
+                          className="p-2 text-red-300 hover:text-red-500 disabled:text-red-200 disabled:cursor-not-allowed transition-colors"
+                          title={u.userId === user?.uid ? "You cannot delete your own account" : "Delete user"}
                         >
                           <Trash2 size={18} />
                         </button>
