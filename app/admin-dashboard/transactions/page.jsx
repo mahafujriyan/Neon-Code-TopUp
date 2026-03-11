@@ -91,31 +91,31 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-8">
+    <div className="space-y-6 p-4 pt-20 sm:p-6 sm:pt-20 md:space-y-8 md:p-8 md:pt-8">
 
       {/* Header */}
-      <div className="pt-12 md:pt-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col gap-4 pt-2 sm:pt-4 md:flex-row md:items-center md:justify-between md:pt-0">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
           <p className="text-gray-500 text-sm mt-1">Monitor all financial activities.</p>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex w-full flex-col gap-3 sm:flex-row md:w-auto">
           {/* <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50 transition">
             <Calendar size={16} /> Select Date
           </button> */}
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#D8FF30] text-black rounded-lg text-sm font-bold hover:bg-[#cbf028] transition shadow-sm">
+          <button className="flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#D8FF30] px-4 py-2 text-sm font-bold text-black shadow-sm transition hover:bg-[#cbf028]">
             <Download size={16} /> Export Report
           </button>
         </div>
       </div>
 
       {/* Transactions Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
         {/* Search */}
-        <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col justify-between gap-4 border-b border-gray-200 p-4 md:flex-row">
+          <div className="relative max-w-md flex-1">
             <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
@@ -125,14 +125,14 @@ export default function TransactionsPage() {
               className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500 transition"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-100 transition">
+          <button className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-bold text-gray-600 transition hover:bg-gray-100">
             <Filter size={16} /> Filter
           </button>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[760px] border-collapse text-left">
             <thead>
               <tr className="bg-gray-50 text-xs font-bold text-gray-500 uppercase border-b border-gray-200">
                 <th className="p-4 pl-6">User UID</th>

@@ -158,24 +158,21 @@ function useProvideFirebaseAuth() {
     }
   };
 
-  return useMemo(
-    () => ({
-      user,
-      userData,
-      authReady,
-      token,
-      role,
-      loading,
-      loadingRole,
-      login,
-      signup,
-      googleLogin,
-      logout,
-      refreshUser,
-      isLoggedIn: !!user,
-    }),
-    [authReady, loading, loadingRole, refreshUser, role, token, user, userData]
-  );
+  return {
+    user,
+    userData,
+    authReady,
+    token,
+    role,
+    loading,
+    loadingRole,
+    login,
+    signup,
+    googleLogin,
+    logout,
+    refreshUser,
+    isLoggedIn: !!user,
+  };
 }
 
 export function FirebaseAuthProvider({ children }) {

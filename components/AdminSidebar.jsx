@@ -171,7 +171,7 @@ const AdminSidebar = () => {
   return (
     <>
       {/* ================= MOBILE HEADER ================= */}
-      <div className="sidebar-shell md:hidden fixed top-0 left-0 w-full z-50 border-b px-4 py-3 flex justify-between items-center shadow-md">
+      <div className="sidebar-shell lg:hidden fixed top-0 left-0 w-full z-50 border-b px-4 py-3 flex justify-between items-center shadow-md">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center">
             <Image
@@ -197,7 +197,7 @@ const AdminSidebar = () => {
 
       {/* ================= MOBILE SIDEBAR ================= */}
       {isMobileOpen && (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-[60] lg:hidden">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setIsMobileOpen(false)}
@@ -252,7 +252,7 @@ const AdminSidebar = () => {
       )}
 
       {/* ================= DESKTOP SIDEBAR ================= */}
-      <div className="sidebar-shell md:w-64 xl:w-72 min-h-screen hidden md:flex flex-col justify-between p-6 border-r">
+      <div className="sidebar-shell hidden min-h-screen flex-col justify-between border-r p-6 lg:flex lg:w-64 xl:w-72">
         <div>
           <div className="flex items-center gap-3 mb-10">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg">

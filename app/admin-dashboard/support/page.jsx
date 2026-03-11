@@ -90,11 +90,11 @@ export default function AdminSupportLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-transparent overflow-hidden text-white pt-16 md:pt-0 lg:pt-0">
+    <div className="flex h-screen overflow-hidden bg-transparent pt-16 text-white lg:pt-0">
       
-      <div className={`${selectedTicket ? "hidden lg:flex" : "flex"} w-full lg:w-[350px] bg-[#0f1d38] border-r border-[#2c4167] flex-col shrink-0 h-full`}>
+      <div className={`${selectedTicket ? "hidden lg:flex" : "flex"} h-full w-full shrink-0 flex-col border-r border-[#2c4167] bg-[#0f1d38] lg:w-[350px]`}>
         <div className="p-5 border-b border-[#2c4167] bg-[#0f1d38]">
-          <h1 className="text-2xl font-black tracking-tight mb-4 text-indigo-600">Support Panel</h1>
+          <h1 className="mb-4 text-xl font-black tracking-tight text-indigo-600 sm:text-2xl">Support Panel</h1>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
@@ -136,7 +136,7 @@ export default function AdminSupportLayout() {
 
       {/* --- RIGHT SIDE: CHAT VIEW --- */}
       {/* মোবাইলে এবং ট্যাবলেটে (lg এর নিচে) টিকেট সিলেক্ট না থাকলে এটি লুকানো থাকবে */}
-      <div className={`${!selectedTicket ? "hidden lg:flex" : "flex"} flex-1 flex-col bg-[#0c1830] h-full relative`}>
+      <div className={`${!selectedTicket ? "hidden lg:flex" : "flex"} relative h-full w-full min-w-0 flex-1 flex-col bg-[#0c1830]`}>
         {selectedTicket ? (
           <>
             {/* Header: Back Button visible on Mobile & Tablet (lg:hidden) */}
@@ -160,13 +160,13 @@ export default function AdminSupportLayout() {
             </div>
 
             {/* Chat Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-8">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 xl:p-8">
               <div className=" mx-auto">
                 {selectedTicket.messages?.map((m, i) => {
                   const isAdmin = m.senderRole === "admin" || m.senderRole === "manager";
                   return (
                     <div key={i} className={`flex w-full mb-8 ${isAdmin ? "justify-end" : "justify-start"}`}>
-                      <div className={`flex flex-col max-w-[88%] md:max-w-[75%] ${isAdmin ? "items-end" : "items-start"}`}>
+                      <div className={`flex max-w-[94%] flex-col sm:max-w-[88%] md:max-w-[75%] ${isAdmin ? "items-end" : "items-start"}`}>
                         <div className="flex items-center gap-2 mb-1.5 px-2">
                           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                             {isAdmin ? "Admin Response" : m.senderName || "End User"}
@@ -178,8 +178,8 @@ export default function AdminSupportLayout() {
                         }`}>
                           <p className="whitespace-pre-wrap">{m.text}</p>
                           {m.screenshots?.map((img, idx) => (
-                            <div key={idx} className="mt-4 rounded-2xl overflow-hidden shadow-md ring-2 ring-black/5">
-                              <img src={img.url} className="max-h-80 w-auto object-cover" alt="img" />
+                            <div key={idx} className="mt-4 overflow-hidden rounded-2xl shadow-md ring-2 ring-black/5">
+                              <img src={img.url} className="max-h-80 w-full object-cover sm:w-auto" alt="img" />
                             </div>
                           ))}
                         </div>
@@ -192,7 +192,7 @@ export default function AdminSupportLayout() {
             </div>
 
             {/* Admin Input Area */}
-            <div className="p-4 md:p-6 bg-[#0f1d38] border-t border-[#2c4167] shadow-[0_-8px_30px_rgb(0,0,0,0.2)]">
+            <div className="border-t border-[#2c4167] bg-[#0f1d38] p-3 shadow-[0_-8px_30px_rgb(0,0,0,0.2)] sm:p-4 md:p-6">
               <div className="max-w-4xl mx-auto">
                 {selectedTicket.status !== "closed" ? (
                   <div className="space-y-4">
@@ -202,7 +202,7 @@ export default function AdminSupportLayout() {
                         <button onClick={() => setScreenshot(null)} className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-2 shadow-lg border-2 border-white hover:bg-red-600"><X size={12}/></button>
                       </div>
                     )}
-                    <div className="flex items-end gap-3 bg-[#132546] p-3 rounded-[28px] border-2 border-[#2c4167] focus-within:border-indigo-500 focus-within:bg-[#152a51] transition-all shadow-inner">
+                    <div className="flex items-end gap-2 rounded-[24px] border-2 border-[#2c4167] bg-[#132546] p-2.5 shadow-inner transition-all focus-within:border-indigo-500 focus-within:bg-[#152a51] sm:gap-3 sm:p-3 sm:rounded-[28px]">
                       <label className="p-3 text-gray-400 hover:text-indigo-600 cursor-pointer active:scale-90 transition-all">
                         {isUploading ? <Loader2 size={24} className="animate-spin" /> : <ImageIcon size={24} />}
                         <input type="file" hidden accept="image/*" onChange={handleFileSelect} />
@@ -211,14 +211,14 @@ export default function AdminSupportLayout() {
                         value={reply} 
                         onChange={(e) => setReply(e.target.value)}
                         placeholder="Type your official message..."
-                        className="flex-1 bg-transparent border-none py-3 text-sm md:text-base focus:ring-0 outline-none resize-none min-h-[48px] max-h-40"
+                        className="min-h-[48px] max-h-40 flex-1 resize-none border-none bg-transparent py-3 text-sm outline-none focus:ring-0 md:text-base"
                         rows={1}
                         onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
                       />
                       <button 
                         onClick={sendReply} 
                         disabled={isSending || isUploading || (!reply.trim() && !screenshot)}
-                        className={`p-4 rounded-2xl shadow-xl transition-all flex items-center justify-center min-w-[56px] ${
+                        className={`flex min-h-[56px] min-w-[56px] items-center justify-center rounded-2xl p-4 shadow-xl transition-all ${
                           isSending || isUploading || (!reply.trim() && !screenshot)
                           ? "bg-slate-700 text-slate-400"
                           : "bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-indigo-200 active:scale-95"

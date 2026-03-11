@@ -99,21 +99,21 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-6 pt-14 md:p-8 space-y-8 pb-12 bg-[#fcfcfc]">
+    <div className="space-y-6 bg-[#fcfcfc] p-4 pt-20 pb-10 sm:p-6 sm:pt-20 md:space-y-8 md:p-8 md:pt-8 md:pb-12">
       
       {/* --- ১. হেডার --- */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-10 md:pt-0">
+      <div className="flex flex-col gap-4 pt-2 sm:pt-4 md:flex-row md:items-center md:justify-between md:pt-0">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Admin Overview</h1>
           <p className="text-gray-500 text-sm">Real-time insights for <span className="text-black font-bold capitalize">{range}</span></p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
+        <div className="flex w-full flex-col gap-2 sm:flex-row md:w-auto">
+          <div className="flex items-center rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm">
             <Filter size={16} className="text-gray-400 mr-2" />
             <select 
               value={range} 
               onChange={(e) => setRange(e.target.value)}
-              className="text-sm font-bold bg-transparent outline-none cursor-pointer"
+              className="w-full cursor-pointer bg-transparent text-sm font-bold outline-none"
             >
               <option value="all">All Time</option>
               <option value="today">Today</option>
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
           </div>
           <button 
             onClick={handleDownload}
-            className="bg-black text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg hover:bg-gray-800 transition flex items-center gap-2"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-black px-5 py-2.5 text-sm font-bold text-white shadow-lg transition hover:bg-gray-800"
           >
             <Download size={16} /> Download
           </button>
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- ২. ফিন্যান্সিয়াল মেট্রিক্স কার্ডস --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
         {metricsConfig.map((item, idx) => (
           <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition">
             <div className="flex justify-between items-start">
@@ -154,9 +154,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- ৩. কালেকশন কাউন্ট ছোট কার্ডস (Sub Cards) --- */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {countsConfig.map((item, idx) => (
-          <div key={idx} className="bg-white p-4 rounded-xl border border-gray-100 flex items-center gap-4">
+          <div key={idx} className="flex items-center gap-4 rounded-xl border border-gray-100 bg-white p-4">
             <div className="p-2 bg-gray-50 rounded-lg text-gray-400">
               <item.icon color="blue" size={18} />
             </div>
@@ -169,8 +169,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- ৪. রেভিনিউ/ইউজার চার্ট --- */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-        <div className="flex justify-between items-center mb-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="text-lg font-bold text-gray-900 underline decoration-lime-400 decoration-4">Registration Analytics</h3>
           <div className="text-sm text-gray-500 font-medium px-3 py-1 bg-gray-50 rounded-lg">Annual View</div>
         </div>
@@ -193,13 +193,13 @@ export default function AdminDashboard() {
       </div>
 
       {/* --- ৫. রিসেন্ট ইউজার টেবিল (১০ জন ইউজার) --- */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-        <div className="flex justify-between items-center mb-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="text-lg font-bold text-gray-900">Recent 10 Registrations</h3>
           <Link href="/admin-dashboard/users"className="text-sm text-blue-600 font-bold hover:underline">View All</Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="min-w-[640px] w-full text-left">
             <thead>
               <tr className="text-xs text-gray-400 border-b border-gray-50 uppercase tracking-wider">
                 <th className="pb-3 font-semibold">User Details</th>

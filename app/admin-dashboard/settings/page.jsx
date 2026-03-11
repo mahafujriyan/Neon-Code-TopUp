@@ -88,12 +88,12 @@ export default function TokenSettings() {
       <div className="w-full space-y-8">
         
         {/* --- HERO SECTION (FULL WIDTH) --- */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 sm:p-6 lg:p-8 rounded-[2rem] border border-gray-100 shadow-sm">
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">System Controls & API</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">System Controls & API</h1>
             <p className="text-gray-500 mt-2 font-medium">Manage backend configurations, security keys, and environment variables.</p>
           </div>
-          <div className="flex items-center gap-3 px-6 py-3 bg-emerald-50 text-emerald-700 rounded-2xl border border-emerald-100 shadow-sm">
+          <div className="flex items-center gap-3 px-4 sm:px-6 py-3 bg-emerald-50 text-emerald-700 rounded-2xl border border-emerald-100 shadow-sm w-full md:w-auto justify-center md:justify-start">
             <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></div>
             <span className="text-xs font-black uppercase tracking-widest text-emerald-800">System Online</span>
           </div>
@@ -105,14 +105,14 @@ export default function TokenSettings() {
           {/* --- LEFT COL: TOKEN EDITOR (Takes 3/4 space on large screens) --- */}
           <div className="xl:col-span-3 space-y-8">
             <div className="bg-white rounded-[2.5rem] border border-gray-200 shadow-2xl shadow-black/[0.02] overflow-hidden">
-              <div className="p-8 md:p-12 space-y-8">
+              <div className="p-5 sm:p-8 md:p-12 space-y-8">
                 
-                <div className="flex items-center gap-5">
+                <div className="flex items-center gap-4 sm:gap-5">
                   <div className="p-4 bg-black text-white rounded-2xl shadow-xl shadow-black/20 transform -rotate-3">
                     <Terminal size={28} />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-gray-900">Facebook System Token</h2>
+                    <h2 className="text-xl sm:text-2xl font-black text-gray-900">Facebook System Token</h2>
                     <p className="text-sm text-gray-400 font-bold uppercase tracking-tighter">Integration Key Management</p>
                   </div>
                 </div>
@@ -130,14 +130,14 @@ export default function TokenSettings() {
                       onChange={(e) => setFbToken(e.target.value)}
                       rows={10}
                       placeholder="Paste your system token starting with EAA..."
-                      className="w-full p-8 bg-gray-50 border border-gray-100 rounded-[2.5rem] text-sm font-mono focus:outline-none focus:ring-8 focus:ring-black/5 focus:border-black transition-all resize-none text-gray-700 shadow-inner leading-relaxed"
+                      className="w-full p-5 sm:p-8 bg-gray-50 border border-gray-100 rounded-[2rem] sm:rounded-[2.5rem] text-sm font-mono focus:outline-none focus:ring-8 focus:ring-black/5 focus:border-black transition-all resize-none text-gray-700 shadow-inner leading-relaxed"
                     />
-                    <div className="absolute bottom-8 right-8 flex gap-2">
+                    <div className="absolute bottom-5 right-5 sm:bottom-8 sm:right-8 flex gap-2">
                         <ShieldCheck className="text-emerald-500" size={28} />
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4 p-6 bg-slate-50 rounded-[2rem] border border-slate-200 border-dashed">
+                  <div className="flex items-start gap-4 p-4 sm:p-6 bg-slate-50 rounded-[2rem] border border-slate-200 border-dashed">
                     <div className="p-2 bg-slate-200 rounded-xl">
                         <AlertCircle size={20} className="text-slate-600" />
                     </div>
@@ -154,7 +154,7 @@ export default function TokenSettings() {
                   <button
                     onClick={handleUpdate}
                     disabled={loading}
-                    className="w-full md:w-auto flex items-center justify-center gap-4 px-12 py-5 bg-black text-white rounded-[2rem] text-sm font-black hover:bg-gray-800 transition-all shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:translate-y-[-2px] active:scale-95 disabled:bg-gray-300"
+                    className="w-full md:w-auto flex items-center justify-center gap-4 px-8 sm:px-12 py-4 sm:py-5 bg-black text-white rounded-[2rem] text-sm font-black hover:bg-gray-800 transition-all shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:translate-y-[-2px] active:scale-95 disabled:bg-gray-300"
                   >
                     {loading ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
                     {loading ? "PROCESSING..." : "UPDATE SYSTEM ACCESS"}
@@ -201,7 +201,7 @@ export default function TokenSettings() {
           <div className="space-y-8">
             
             {/* Server Status */}
-            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
+            <div className="bg-white p-5 sm:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 flex items-center gap-2">
                  <Server size={14} /> Global Status
                </h3>
@@ -224,7 +224,7 @@ export default function TokenSettings() {
             </div>
 
             {/* Quick Data Sync */}
-            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
+            <div className="bg-white p-5 sm:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-6">
                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 flex items-center gap-2">
                  <Database size={14} /> Analytics Sync
                </h3>
@@ -247,7 +247,7 @@ export default function TokenSettings() {
             </div>
 
             {/* Logs Placeholder */}
-            <div className="p-8 bg-indigo-50/50 rounded-[2.5rem] border border-indigo-100 flex flex-col items-center text-center">
+            <div className="p-5 sm:p-8 bg-indigo-50/50 rounded-[2.5rem] border border-indigo-100 flex flex-col items-center text-center">
                 <Activity size={32} className="text-indigo-600 mb-3" />
                 <h4 className="text-sm font-black text-indigo-900 mb-2 uppercase tracking-tighter">Activity Monitoring</h4>
                 <p className="text-[10px] text-indigo-400 font-bold leading-relaxed px-4 uppercase">

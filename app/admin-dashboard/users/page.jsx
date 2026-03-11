@@ -17,6 +17,17 @@ const statusColor = (status) => {
   }
 };
 
+const roleColor = (role) => {
+  switch (role) {
+    case "admin":
+      return "bg-purple-50 text-purple-600";
+    case "team_member":
+      return "bg-cyan-50 text-cyan-600";
+    default:
+      return "bg-blue-50 text-blue-600";
+  }
+};
+
 export default function AllUsersPage() {
   const { token, user } = useFirebaseAuth();
 
@@ -118,30 +129,30 @@ export default function AllUsersPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-8 bg-[#fcfcfc] min-h-screen">
+    <div className="min-h-screen space-y-6 bg-[#fcfcfc] p-4 pt-20 sm:p-6 sm:pt-20 md:p-8 md:pt-8">
       
       {/* HEADER SECTION */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">User Management</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">User Management</h1>
           <p className="text-gray-500 mt-1">Manage, monitor and export your system users.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative group">
+        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+          <div className="group relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name or email..."
-              className="pl-10 pr-4 py-2.5 w-full sm:w-72 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-black/5 focus:border-black transition-all shadow-sm"
+              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 sm:w-72"
             />
           </div>
 
           <button
             onClick={handleExportCSV}
             disabled={loading || filteredUsers.length === 0}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-black px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all active:scale-95 hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
           >
             <Download size={18} /> Export CSV
           </button>
@@ -149,9 +160,9 @@ export default function AllUsersPage() {
       </div>
 
       {/* TABLE SECTION */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-black/5 overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl shadow-black/5">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="min-w-[720px] w-full text-left">
             <thead className="bg-gray-50/50 border-b border-gray-100 text-gray-400">
               <tr>
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest">User Details</th>
@@ -212,7 +223,7 @@ export default function AllUsersPage() {
                     {/* ROLE */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-lg ${u.role === 'admin' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600'}`}>
+                        <div className={`p-1.5 rounded-lg ${roleColor(u.role)}`}>
                             <Shield size={14} />
                         </div>
                         <span className="text-sm font-bold text-gray-700 capitalize">

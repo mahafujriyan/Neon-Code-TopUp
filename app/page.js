@@ -24,6 +24,11 @@ export default function Home() {
       return;
     }
 
+    if (role === "team_member") {
+      router.replace("/team-member-dashboard");
+      return;
+    }
+
     router.replace("/user-dashboard/overview");
   }, [authReady, user, role, loadingRole, router]);
 

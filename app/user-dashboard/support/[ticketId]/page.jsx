@@ -113,12 +113,12 @@ export default function UserChatView({ ticketIdFromProps, onBack }) {
   return (
     <div className="flex flex-col h-full bg-white lg:bg-[#F8FAFC]">
       {/* Header */}
-      <div className="px-4 py-[22px] bg-white flex items-center justify-between sticky top-0 z-10 shadow-sm ">
-        <div className="flex items-center gap-3 overflow-hidden">
+      <div className="px-4 py-4 sm:py-[22px] bg-white flex items-start sm:items-center justify-between gap-3 sticky top-0 z-10 shadow-sm ">
+        <div className="flex items-start sm:items-center gap-3 overflow-hidden min-w-0">
           <button onClick={onBack} className="lg:hidden p-1.5 hover:bg-gray-100 rounded-full transition">
             <ChevronLeft size={24} className="text-gray-600" />
           </button>
-          <div className="overflow-hidden">
+          <div className="overflow-hidden min-w-0">
             <h2 className="font-bold text-gray-800 text-sm md:text-xl truncate leading-tight">{ticket.subject}</h2>
             <p className="text-[10px] md:text-xs text-gray-400 font-medium tracking-tight uppercase">Ticket ID: {ticketId.toString().slice(-6)}</p>
           </div>
@@ -136,7 +136,7 @@ export default function UserChatView({ ticketIdFromProps, onBack }) {
           const isMine = m.senderId === user?.uid;
           return (
             <div key={i} className={`flex w-full ${isMine ? "justify-end" : "justify-start"}`}>
-              <div className={`flex flex-col max-w-[85%] md:max-w-[70%] ${isMine ? "items-end" : "items-start"}`}>
+              <div className={`flex flex-col max-w-[92%] sm:max-w-[85%] md:max-w-[70%] ${isMine ? "items-end" : "items-start"}`}>
                 <div className="flex items-center gap-2 mb-1.5 px-1">
                   {!isMine && <div className="bg-gray-200 p-1 rounded-full"><ShieldCheck size={10} className="text-gray-600" /></div>}
                   <span className="text-[11px] font-bold text-gray-500 uppercase tracking-tighter">
@@ -150,7 +150,7 @@ export default function UserChatView({ ticketIdFromProps, onBack }) {
                   <p className="whitespace-pre-wrap">{m.text}</p>
                   {m.screenshots?.map((img, idx) => (
                     <div key={idx} className="mt-3 overflow-hidden rounded-xl border border-black/5">
-                      <img src={img.url} className="max-h-60 md:max-h-80 w-auto object-cover" alt="attachment" />
+                      <img src={img.url} className="max-h-60 md:max-h-80 w-full object-cover" alt="attachment" />
                     </div>
                   ))}
                 </div>
@@ -177,7 +177,7 @@ export default function UserChatView({ ticketIdFromProps, onBack }) {
               </div>
             )}
 
-            <div className="flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-100 focus-within:border-[#10B981] transition-all">
+            <div className="flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-100 focus-within:border-[#10B981] transition-all min-w-0">
               {/* Image Upload Button */}
               <label className="p-2.5 text-gray-400 hover:text-[#10B981] cursor-pointer transition-colors">
                 {isUploading ? <Loader2 size={20} className="animate-spin" /> : <ImageIcon size={20} />}
@@ -188,7 +188,7 @@ export default function UserChatView({ ticketIdFromProps, onBack }) {
                 value={messageText} 
                 onChange={(e) => setMessageText(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 bg-transparent border-none p-2 text-sm md:text-base focus:ring-0 outline-none resize-none min-h-[44px] max-h-32"
+                className="flex-1 min-w-0 bg-transparent border-none p-2 text-sm md:text-base focus:ring-0 outline-none resize-none min-h-[44px] max-h-32"
                 rows={1}
                 onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
               />

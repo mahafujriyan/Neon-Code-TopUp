@@ -11,7 +11,7 @@ export default function AdminChatsPage() {
   const handleBackToInbox = () => setActiveChat(null);
 
   return (
-    <div className="flex h-[calc(100vh-20px)] bg-white rounded-2xl shadow-sm border pt-16 md:pt-0 border-gray-100 overflow-hidden m-2 md:m-4">
+    <div className="flex h-[calc(100vh-4.5rem)] lg:h-[calc(100vh-20px)] bg-white lg:rounded-2xl shadow-sm border border-gray-100 overflow-hidden m-0 lg:m-2 xl:m-4 pt-16 lg:pt-0">
       
       {/* --- LEFT SIDE: Inbox --- */}
       {/* ১. activeChat থাকলে lg (১০২৪ পিক্সেল) এর নিচে এটি hidden থাকবে।
@@ -20,7 +20,7 @@ export default function AdminChatsPage() {
       */}
       <div className={`
         ${activeChat ? "hidden lg:flex" : "flex flex-1 lg:flex-none"} 
-        lg:w-80 xl:w-96 flex-col border-r border-gray-100 bg-slate-50/20
+        lg:w-80 xl:w-96 flex-col border-r border-gray-100 bg-slate-50/20 min-w-0
       `}>
         <AdminChatInbox 
           onSelect={setActiveChat} 
@@ -34,20 +34,20 @@ export default function AdminChatsPage() {
       */}
       <div className={`
         ${activeChat ? "flex flex-1" : "hidden lg:flex lg:flex-1"} 
-        flex-col bg-white relative
+        flex-col bg-white relative min-w-0
       `}>
         {activeChat ? (
           <>
             {/* Mobile & Tablet Header (lg পর্যন্ত ব্যাক বাটন থাকবে) */}
-            <div className="lg:hidden flex items-center p-4 border-b bg-white shrink-0">
+            <div className="lg:hidden flex items-center p-4 border-b bg-white shrink-0 min-w-0">
               <button 
                 onClick={handleBackToInbox}
                 className="p-2 -ml-2 hover:bg-gray-100 rounded-full text-indigo-600 transition-colors"
               >
                 <ArrowLeft size={24} />
               </button>
-              <div className="ml-2">
-                <p className="text-sm font-bold text-slate-800 leading-none">
+              <div className="ml-2 min-w-0">
+                <p className="text-sm font-bold text-slate-800 leading-none truncate">
                   {activeChat.guestName || "Guest User"}
                 </p>
                 <p className="text-[10px] text-green-500 font-bold uppercase mt-1 tracking-wider">Active</p>

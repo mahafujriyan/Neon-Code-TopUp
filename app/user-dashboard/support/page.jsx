@@ -38,21 +38,21 @@ export default function MyTicketsPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-20px)] overflow-hidden pt-16 md:pt-0 m-0 lg:rounded-2xl border-none lg:border border-[#2c4167] shadow-none text-black bg-[linear-gradient(180deg,#081227_0%,#0d1d3b_100%)]">
+    <div className="flex h-[calc(100vh-4.5rem)] lg:h-[calc(100vh-20px)] overflow-hidden pt-16 lg:pt-0 m-0 lg:m-2 xl:m-4 lg:rounded-2xl border-none lg:border border-[#2c4167] shadow-none text-black bg-[linear-gradient(180deg,#081227_0%,#0d1d3b_100%)]">
       
       {/* Sidebar */}
       <div className={`
         ${view !== "list" ? "hidden lg:flex" : "flex"} 
-        w-full lg:w-[380px] border-r border-[#2c4167] flex-col bg-[#0f1d38] transition-all duration-300
+        w-full lg:w-[380px] xl:w-[420px] border-r border-[#2c4167] flex-col bg-[#0f1d38] transition-all duration-300 min-w-0
       `}>
-        <div className=" px-4 py-5  flex justify-between items-center border-b border-gray-200">
+        <div className="px-4 py-4 sm:py-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-b border-gray-200">
 
           <div className="flex items-center  gap-3">
             <div className="bg-[#10B981] p-2.5 rounded-xl shrink-0">
               <MessageSquare size={22} className="text-white" />
             </div>
             <div className="overflow-hidden">
-              <h1 className="text-xl font-bold text-gray-800 tracking-tight">Support</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-800 tracking-tight">Support</h1>
               <p className="text-[11px] text-gray-500 font-medium">Customer Help Desk</p>
             </div>
           </div>
@@ -62,14 +62,14 @@ export default function MyTicketsPage() {
               setView("create");
               setActiveTicketId(null);
             }}
-            className="bg-[#10B981] text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-[#0da371] transition-all flex items-center gap-1.5 shadow-md shadow-green-100"
+            className="bg-[#10B981] text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-[#0da371] transition-all flex items-center justify-center gap-1.5 shadow-md shadow-green-100 w-full sm:w-auto"
           >
             <Plus size={18} /> <span>New</span>
           </button>
 
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 pb-4 pt-2 space-y-2">
+        <div className="flex-1 overflow-y-auto px-3 pb-4 pt-2 space-y-2 min-w-0">
           {tickets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="bg-gray-50 p-6 rounded-3xl mb-4">
@@ -89,14 +89,14 @@ export default function MyTicketsPage() {
                     setActiveTicketId(cleanId);
                     setView("chat");
                   }}
-                  className={`p-4 rounded-2xl cursor-pointer transition-all border ${
+                  className={`p-4 rounded-2xl cursor-pointer transition-all border min-w-0 ${
                     isActive
                       ? "bg-white border-gray-200 shadow-lg scale-[1.01] ring-1 ring-black/5"
                       : " border-transparent bg-gray-100"
                   }`}
                 >
                   <div className="font-bold text-sm text-gray-800 truncate mb-2">{t.subject}</div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-wrap justify-between items-center gap-2">
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
                       t.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                     }`}>
@@ -116,7 +116,7 @@ export default function MyTicketsPage() {
       {/* Main Content Area */}
       <div className={`
         ${view === "list" ? "hidden lg:flex" : "flex"} 
-        flex-1 flex-col bg-[#0c1830] w-full h-full relative
+        flex-1 flex-col bg-[#0c1830] w-full h-full relative min-w-0
       `}>
         {view === "list" && (
           <div className="hidden lg:flex flex-col items-center justify-center h-full animate-in fade-in zoom-in duration-500 text-center">

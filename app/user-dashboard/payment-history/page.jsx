@@ -119,18 +119,18 @@ const PaymentHistoryUI = () => {
     );
 
   return (
-    <div className="p-6">
+    <div className="w-full p-4 pt-20 md:p-6 lg:p-8 lg:pt-8">
       <div className="bg-white text-black rounded-xl shadow-lg border border-gray-100 overflow-hidden">
         {/* Header & Actions */}
-        <div className="p-6 border-b border-gray-100 flex flex-col md:flex-row gap-4 justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+        <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col lg:flex-row gap-4 justify-between lg:items-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
             <FileText size={20} className="text-blue-600" />
             Payment History
           </h2>
 
-          <div className="flex gap-3 w-full md:w-auto">
+          <div className="flex w-full flex-col sm:flex-row gap-3 lg:w-auto">
             {/* Status Filter Dropdown */}
-            <div className="relative">
+            <div className="relative w-full sm:w-auto">
               <label htmlFor="status-filter" className="sr-only">
                 Filter by Status
               </label>
@@ -140,7 +140,7 @@ const PaymentHistoryUI = () => {
                   id="status-filter"
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full md:w-40 appearance-none pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
+                  className="w-full sm:w-40 appearance-none pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all cursor-pointer"
                 >
                   {STATUS_OPTIONS.map((status) => (
                     <option key={status} value={status}>
@@ -158,7 +158,7 @@ const PaymentHistoryUI = () => {
                 fetchData();
                 setFilterStatus("All");
               }}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
             >
               <RefreshCw size={16} /> Refresh
             </button>
@@ -166,7 +166,7 @@ const PaymentHistoryUI = () => {
             {/* Export CSV Button */}
             <button
               onClick={exportCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-md"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-md"
             >
               <Download size={16} /> Export
             </button>
@@ -175,7 +175,7 @@ const PaymentHistoryUI = () => {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full min-w-[760px] text-left border-collapse">
             <thead>
               <tr className="bg-gray-50 text-gray-600 text-sm uppercase font-bold tracking-wider">
                 <th className="px-6 py-4">Transaction ID</th>
@@ -226,7 +226,7 @@ const PaymentHistoryUI = () => {
 
         {/* Pagination Footer */}
         {filteredPayments.length > ROWS_PER_PAGE && (
-          <div className="p-4 border-t border-gray-100 flex justify-between items-center text-sm text-gray-600">
+          <div className="p-4 border-t border-gray-100 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center text-sm text-gray-600">
             <p>
               Showing {Math.min((page - 1) * ROWS_PER_PAGE + 1, filteredPayments.length)} to{" "}
               {Math.min(page * ROWS_PER_PAGE, filteredPayments.length)} of {filteredPayments.length} results

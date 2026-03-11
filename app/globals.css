@@ -28,12 +28,20 @@
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   color: var(--text-main);
   background:
     radial-gradient(circle at 12% 18%, rgba(40, 87, 175, 0.28), transparent 42%),
     radial-gradient(circle at 84% 82%, rgba(212, 175, 55, 0.17), transparent 42%),
     linear-gradient(135deg, var(--bg-start), var(--bg-end));
   font-family: var(--font-bangla), "Noto Sans Bengali", sans-serif;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 .neon-grid {
@@ -329,4 +337,62 @@ select:focus {
 
 .admin-dashboard-content table tbody tr:hover {
   background: rgba(31, 55, 97, 0.42) !important;
+}
+
+@media (max-width: 1023px) {
+  .dashboard-shell {
+    min-height: 100vh;
+  }
+
+  .dashboard-content,
+  .admin-dashboard-content {
+    width: 100%;
+    border-left: none !important;
+  }
+
+  .dashboard-content :is(div, section, article, aside, form).bg-white,
+  .dashboard-content :is(div, section, article, aside, form).bg-gray-50,
+  .dashboard-content :is(div, section, article, aside, form).bg-slate-50,
+  .dashboard-content :is(div, section, article, aside, form).bg-gray-100,
+  .dashboard-content :is(div, section, article, aside, form).bg-slate-100,
+  .dashboard-content :is(div, section, article, aside, form)[class*="rounded-"][class*="border"],
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-white,
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-gray-50,
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-slate-50,
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-gray-100,
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-slate-100,
+  .admin-dashboard-content :is(div, section, article, aside, form)[class*="rounded-"][class*="border"] {
+    border-radius: 20px !important;
+  }
+
+  .dashboard-content table,
+  .admin-dashboard-content table {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard-content :is(div, section, article, aside, form).bg-white,
+  .dashboard-content :is(div, section, article, aside, form).bg-gray-50,
+  .dashboard-content :is(div, section, article, aside, form).bg-slate-50,
+  .dashboard-content :is(div, section, article, aside, form).bg-gray-100,
+  .dashboard-content :is(div, section, article, aside, form).bg-slate-100,
+  .dashboard-content :is(div, section, article, aside, form)[class*="rounded-"][class*="border"],
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-white,
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-gray-50,
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-slate-50,
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-gray-100,
+  .admin-dashboard-content :is(div, section, article, aside, form).bg-slate-100,
+  .admin-dashboard-content :is(div, section, article, aside, form)[class*="rounded-"][class*="border"] {
+    border-radius: 18px !important;
+  }
+
+  .dashboard-content input:not([type="checkbox"]):not([type="radio"]),
+  .dashboard-content textarea,
+  .dashboard-content select,
+  .admin-dashboard-content input:not([type="checkbox"]):not([type="radio"]),
+  .admin-dashboard-content textarea,
+  .admin-dashboard-content select {
+    font-size: 16px !important;
+  }
 }

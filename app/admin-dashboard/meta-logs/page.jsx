@@ -88,17 +88,17 @@ export default function BudgetLogsPage() {
   const totalPages = Math.ceil(totalLogs / limit);
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] p-4 pt-20 md:p-8 w-full font-sans">
+    <div className="min-h-screen bg-[#f8f9fa] p-4 pt-20 md:p-6 lg:p-8 w-full font-sans">
       <div className="w-full space-y-8">
         
         {/* --- HEADER SECTION (Matches your design) --- */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Meta Logs History</h1>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Meta Logs History</h1>
             <p className="text-gray-500 mt-1 font-medium">Manage, monitor and export spending logs.</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <div className="relative group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
               <input
@@ -112,7 +112,7 @@ export default function BudgetLogsPage() {
             <button
               onClick={handleExportCSV}
               disabled={loading || filteredLogs.length === 0}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed w-full sm:w-auto"
             >
               <Download size={18} /> Export CSV
             </button>
@@ -147,7 +147,7 @@ export default function BudgetLogsPage() {
         {/* --- DATA TABLE --- */}
         <div className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full min-w-[980px] text-left">
               <thead className="bg-gray-50/80 border-b border-gray-100">
                 <tr>
                   <th className="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">User Profile</th>
@@ -211,7 +211,7 @@ export default function BudgetLogsPage() {
           </div>
 
           {/* --- PAGINATION --- */}
-          <div className="px-8 py-5 bg-gray-50/50 border-t border-gray-100 flex justify-between items-center">
+          <div className="px-4 sm:px-8 py-5 bg-gray-50/50 border-t border-gray-100 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
             <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
               Showing {filteredLogs.length} of {totalLogs}
             </span>

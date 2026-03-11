@@ -1,5 +1,6 @@
 import getDB from "@/lib/mongodb";
 import { verifyToken } from "@/lib/verifyToken";
+import { getTeamMemberPublicUrl, getTeamMemberQrUrl } from "@/lib/teamMemberProfile";
 
 export async function GET(req, { params }) {
   try {
@@ -56,6 +57,10 @@ export async function GET(req, { params }) {
           allowTopupAction: user.metaAdsConfig?.allowTopupAction ?? true,
           remainingBudgetOverride: user.metaAdsConfig?.remainingBudgetOverride ?? null,
         },
+        teamMemberUsername: user.teamMemberUsername ?? "",
+        teamMemberProfile: user.teamMemberProfile ?? null,
+        teamMemberPublicUrl: getTeamMemberPublicUrl(user.teamMemberUsername),
+        teamMemberQrUrl: getTeamMemberQrUrl(user.teamMemberUsername),
         createdAt: user.createdAt,
         updatedAt: user.updatedAt ?? user.createdAt,
       },

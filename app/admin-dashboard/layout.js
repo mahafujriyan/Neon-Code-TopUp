@@ -9,7 +9,7 @@ export default function AdminLayout({ children }) {
     <div className="dashboard-shell neon-grid flex h-screen w-full overflow-hidden">
       <DashboardMouseGlow />
       <AdminSidebar />
-      <div className="dashboard-content admin-dashboard-content flex-1 h-full overflow-y-auto text-[#f5f8ff]">
+      <div className="dashboard-content admin-dashboard-content min-w-0 flex-1 h-full overflow-y-auto pt-16 text-[#f5f8ff] lg:pt-0">
         {children}
       </div>
     </div>

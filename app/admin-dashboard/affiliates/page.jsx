@@ -146,26 +146,26 @@ export default function AffiliatePayoutsPage() {
   }
 
   return (
-    <div className="p-6 pt-20 md:p-8 space-y-8 bg-[#fcfcfc] min-h-screen">
+    <div className="min-h-screen space-y-6 bg-[#fcfcfc] p-4 pt-20 sm:p-6 sm:pt-20 md:space-y-8 md:p-8 md:pt-8">
 
       {/* HEADER */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Affiliate Payouts</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Affiliate Payouts</h1>
           <p className="text-gray-500 mt-1">Review and process affiliate withdrawal requests in real-time.</p>
         </div>
 
         <button
           onClick={handleExportCSV}
           disabled={filteredRequests.length === 0}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-95 disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-black px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all active:scale-95 hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
         >
           <Download size={18} /> Export Data (CSV)
         </button>
       </div>
 
       {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm flex items-center gap-5">
             <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
                 <TrendingUp size={24} />
@@ -198,10 +198,10 @@ export default function AffiliatePayoutsPage() {
       </div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-black/5 overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl shadow-black/5">
         {/* FILTERS */}
-        <div className="p-5 border-b border-gray-50 flex flex-col md:flex-row gap-4 justify-between items-center">
-            <div className="relative group w-full md:max-w-md">
+        <div className="flex flex-col items-stretch justify-between gap-4 border-b border-gray-50 p-5 md:flex-row md:items-center">
+            <div className="group relative w-full md:max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
                 <input
                     type="text"
@@ -212,7 +212,7 @@ export default function AffiliatePayoutsPage() {
                 />
             </div>
 
-            <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex w-full items-center gap-3 md:w-auto">
                 <Filter size={18} className="text-gray-400" />
                 <select
                     className="flex-1 md:w-48 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-700 bg-white focus:outline-none focus:ring-4 focus:ring-black/5"
@@ -227,7 +227,7 @@ export default function AffiliatePayoutsPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full min-w-[760px] text-left">
             <thead className="bg-gray-50/50 border-b border-gray-100 text-gray-400">
               <tr>
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest">Affiliate User</th>

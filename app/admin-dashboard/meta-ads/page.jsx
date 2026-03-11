@@ -256,29 +256,29 @@ export default function AdminAdAccountApprove() {
   }
 
   return (
-    <div className="p-6 md:p-8 space-y-8 bg-[#fcfcfc] min-h-screen">
+    <div className="min-h-screen space-y-6 bg-[#fcfcfc] p-4 pt-20 sm:p-6 sm:pt-20 md:space-y-8 md:p-8 md:pt-8">
       
       {/* HEADER SECTION */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Ad Account Panel</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Ad Account Panel</h1>
           <p className="text-gray-500 mt-1">Review and approve business ad account requests.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative group">
+        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+          <div className="group relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors" size={18} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search account or email..."
-              className="pl-10 pr-4 py-2.5 w-full sm:w-72 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-4 focus:ring-black/5 focus:border-black transition-all shadow-sm"
+              className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-all focus:border-black focus:outline-none focus:ring-4 focus:ring-black/5 sm:w-72"
             />
           </div>
           
           <button 
             onClick={load}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all shadow-sm active:scale-95"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-bold shadow-sm transition-all active:scale-95 hover:bg-gray-50"
           >
             <RefreshCcw size={16} className={loading ? "animate-spin" : ""} /> Refresh
           </button>
@@ -286,7 +286,7 @@ export default function AdminAdAccountApprove() {
       </div>
 
       {/* TABLE SECTION */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-xl shadow-black/5 overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl shadow-black/5">
         <div className="p-4 border-b border-gray-100 bg-slate-50/60">
           <div className="flex items-center justify-between gap-3 mb-3">
             <h3 className="text-sm font-black text-gray-800">Manual Ad Account Add (Admin)</h3>
@@ -298,7 +298,7 @@ export default function AdminAdAccountApprove() {
             </button>
           </div>
           {showManualAdd && (
-            <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-7">
               <input placeholder="Account Name" value={newAccount.accountName} onChange={(e) => setNewAccount((p) => ({ ...p, accountName: e.target.value }))} className="border rounded-lg px-3 py-2 text-xs bg-white" />
               <input placeholder="BM ID" value={newAccount.bmId} onChange={(e) => setNewAccount((p) => ({ ...p, bmId: e.target.value }))} className="border rounded-lg px-3 py-2 text-xs bg-white" />
               <input placeholder="Budget" type="number" value={newAccount.monthlyBudget} onChange={(e) => setNewAccount((p) => ({ ...p, monthlyBudget: e.target.value }))} className="border rounded-lg px-3 py-2 text-xs bg-white" />
@@ -312,7 +312,7 @@ export default function AdminAdAccountApprove() {
           )}
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
+          <table className="w-full min-w-[980px] text-left">
             <thead className="bg-gray-50/50 border-b border-gray-100 text-gray-400">
               <tr>
                 <th className="px-6 py-4 text-[11px] font-bold uppercase tracking-widest">Account Details</th>

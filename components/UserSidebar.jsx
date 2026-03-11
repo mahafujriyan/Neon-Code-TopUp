@@ -98,7 +98,7 @@ const UserSidebar = () => {
   return (
     <>
       {/* ================= Mobile Header ================= */}
-      <div className="sidebar-shell md:hidden fixed top-0 left-0 w-full z-50 px-4 py-3 flex justify-between items-center border-b">
+      <div className="sidebar-shell lg:hidden fixed top-0 left-0 w-full z-50 px-4 py-3 flex justify-between items-center border-b">
         <div className="flex items-center gap-2">
           <Image src="/Neon Studio icon.png" alt="Logo" width={24} height={24} />
           <span className="font-bold text-white text-lg">neonstudio</span>
@@ -113,7 +113,7 @@ const UserSidebar = () => {
 
       {/* ================= Mobile Drawer ================= */}
       {isMobileOpen && (
-        <div className="fixed inset-0 z-[60] md:hidden">
+        <div className="fixed inset-0 z-[60] lg:hidden">
           <div
             className="absolute inset-0 bg-black/60"
             onClick={() => setIsMobileOpen(false)}
@@ -191,7 +191,7 @@ const UserSidebar = () => {
       )}
 
       {/* ================= Desktop Sidebar ================= */}
-      <div className="sidebar-shell hidden md:flex md:w-64 xl:w-72 min-h-screen p-6 flex-col justify-between border-r">
+      <div className="sidebar-shell hidden min-h-screen flex-col justify-between border-r p-6 lg:flex lg:w-64 xl:w-72">
         <div>
           <div className="flex items-center gap-3 mb-10">
             <Image src="/Neon Studio icon.png" alt="Logo" width={32} height={32} />

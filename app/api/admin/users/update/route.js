@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import getDB from "@/lib/mongodb";
 import { verifyToken } from "@/lib/verifyToken";
+import {
+  normalizeTeamMemberUsername,
+  sanitizeTeamMemberProfile,
+} from "@/lib/teamMemberProfile";
 
-const ALLOWED_ROLES = ["user", "manager", "admin"];
+const ALLOWED_ROLES = ["user", "manager", "admin", "team_member"];
 const ALLOWED_STATUS = ["active", "pending", "inactive"];
 
 const toSafeNumber = (value, fallback = 0) => {
@@ -87,6 +91,8 @@ export async function POST(req) {
       payoutMethods,
       metaAdsConfig,
       level1DepositCount,
+      teamMemberUsername,
+      teamMemberProfile,
     } = body;
 
     if (!userId) {
@@ -155,6 +161,31 @@ export async function POST(req) {
         level1DepositCount,
         target.level1DepositCount || 0
       );
+    }
+
+    if (teamMemberUsername !== undefined) {
+      const normalizedUsername = normalizeTeamMemberUsername(teamMemberUsername);
+
+      if (normalizedUsername) {
+        if (normalizedUsername.length < 3) {
+          return NextResponse.json({ error: "Team member username must be at least 3 characters" }, { status: 400 });
+        }
+
+        const usernameOwner = await db.collection("users").findOne(
+          { teamMemberUsername: normalizedUsername },
+          { projection: { userId: 1 } }
+        );
+
+        if (usernameOwner && usernameOwner.userId !== userId) {
+          return NextResponse.json({ error: "That team member username is already taken" }, { status: 409 });
+        }
+      }
+
+      updatePayload.teamMemberUsername = normalizedUsername;
+    }
+
+    if (teamMemberProfile !== undefined) {
+      updatePayload.teamMemberProfile = sanitizeTeamMemberProfile(teamMemberProfile, target);
     }
 
     await db.collection("users").updateOne({ userId }, { $set: updatePayload });
